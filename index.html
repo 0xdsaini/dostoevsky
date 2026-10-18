@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500&display=swap" rel="stylesheet">
 <title>The Idiot · Audiobook</title>
 <style>
 :root{color-scheme:light;--bg:#f5f6f8;--panel:#fff;--text:#20242b;--muted:#687080;--line:#e1e5eb;--accent:#5b63e6;--soft:#eef0ff;--good:#16835d;--bad:#b45309;--shadow:0 8px 28px #1d27350b}
@@ -297,6 +300,38 @@ body>header{position:relative;top:auto;flex:0 0 auto;min-height:62px;padding-lef
   .text-fullscreen-head .dock-transport .dock-play{width:58px;height:58px;min-width:58px;min-height:58px}
 }
 
+
+
+/* Reading typography: reflow Gutenberg's hard-wrapped source lines into real paragraphs. */
+.text-fullscreen .reader{
+  font-family:"Literata","Iowan Old Style","Palatino Linotype","Book Antiqua","Noto Serif",Georgia,serif!important;
+  font-size:var(--reader-font-size,22px)!important;
+  font-weight:400;
+  line-height:1.78!important;
+  letter-spacing:0!important;
+  font-kerning:normal;
+  font-variant-ligatures:common-ligatures;
+  max-width:76ch;
+  width:100%;
+  margin-inline:auto;
+  overflow-wrap:normal;
+  word-break:normal;
+  text-wrap:pretty;
+  -webkit-text-size-adjust:100%;
+  padding:calc(60px + env(safe-area-inset-top,0px)) clamp(22px,6vw,64px) calc(190px + env(safe-area-inset-bottom,0px))!important;
+  scroll-padding-top:40%;
+  scroll-padding-bottom:190px;
+}
+.text-fullscreen .reader .word-space{white-space:normal!important}
+.text-fullscreen .reader .paragraph-break{display:block;height:.72em;line-height:0;content:"";}
+.reader-font-row .font-size-control{display:flex;align-items:center;gap:10px}
+.reader-font-row .font-size-control button{width:40px;min-width:40px;height:38px;min-height:38px;padding:0;display:grid;place-items:center;font-size:22px}
+#readerFontReadout{min-width:48px;text-align:center;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.reader-font-hint{margin-top:-5px;margin-bottom:12px;color:var(--muted);font-size:11px;line-height:1.4}
+@media(max-width:600px){
+ .text-fullscreen .reader{max-width:none;padding:calc(62px + env(safe-area-inset-top,0px)) 23px calc(200px + env(safe-area-inset-bottom,0px))!important;line-height:1.76!important}
+}
+
 </style>
 </head>
 <body>
@@ -405,6 +440,8 @@ body>header{position:relative;top:auto;flex:0 0 auto;min-height:62px;padding-lef
   <div id="settingsSheet" class="settings-sheet" hidden>
     <div class="settings-title">Playback settings</div>
     <div class="settings-row"><span>Playback speed</span><div class="fullscreen-speed"><button id="fullSlowerBtn" type="button" aria-label="Decrease playback speed" title="Decrease speed">−</button><span id="fullSpeedReadout" class="speed-readout">1×</span><button id="fullFasterBtn" type="button" aria-label="Increase playback speed" title="Increase speed">+</button></div></div>
+    <div class="settings-row reader-font-row"><span>Reading size</span><div class="font-size-control"><button id="readerFontDownBtn" type="button" aria-label="Decrease reading text size" title="Smaller text">−</button><span id="readerFontReadout">22 px</span><button id="readerFontUpBtn" type="button" aria-label="Increase reading text size" title="Larger text">+</button></div></div>
+    <div class="reader-font-hint">Pinch with two fingers on the text to resize it, too.</div>
     <button id="functionWordsBtn" type="button" class="settings-toggle" aria-label="Show function words in RSVP" title="Show function words" aria-pressed="false"><span>Show function words in RSVP</span><span class="toggle-track"><span class="toggle-knob"></span></span></button>
   </div>
   <div id="rsvpView" class="rsvp-view" hidden aria-live="off"><div id="rsvpWord" class="rsvp-word"></div></div>
@@ -431,12 +468,20 @@ body>header{position:relative;top:auto;flex:0 0 auto;min-height:62px;padding-lef
   let current=Number.isInteger(savedState.chapterIndex)?Math.max(0,Math.min(49,savedState.chapterIndex)):0, filterPart=savedState.filterPart||'1', wordRecords=[], followAudio=savedState.followAudio!==false, lastWord=-1;
   let rsvpIndex=-1, rsvpTimer=null, fullscreenRequested=false, showFunctionWords=savedState.showFunctionWords===true, controlsHideTimer=null;
   let pendingRestoreTime=Number(savedState.currentTime)||0, initialRestorePending=true, lastProgressSave=0;
+  let readerFontSize=Math.max(17,Math.min(38,Number(savedState.readerFontSize)||22)), pinchStartDistance=0, pinchStartFontSize=readerFontSize;
   function saveState(force=false){
     const now=Date.now(); if(!force && now-lastProgressSave<1800)return; lastProgressSave=now;
     const actualTime=Number.isFinite(audio.currentTime)?audio.currentTime:0;
     const storedTime=(pendingRestoreTime>0 && actualTime<0.25)?pendingRestoreTime:actualTime;
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify({chapterIndex:current,currentTime:storedTime,playbackRate:audio.playbackRate||Number(savedState.playbackRate)||1,theme:document.documentElement.dataset.theme||'light',showFunctionWords,followAudio,fullscreenMode,filterPart,updatedAt:now}));}catch(e){}
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify({chapterIndex:current,currentTime:storedTime,playbackRate:audio.playbackRate||Number(savedState.playbackRate)||1,theme:document.documentElement.dataset.theme||'light',showFunctionWords,followAudio,fullscreenMode,filterPart,readerFontSize,updatedAt:now}));}catch(e){}
   }
+  function setReaderFontSize(value, persist=true){
+    readerFontSize=Math.max(17,Math.min(38,Math.round(Number(value)||22)));
+    reader.style.setProperty('--reader-font-size',`${readerFontSize}px`);
+    const readout=$('readerFontReadout'); if(readout) readout.textContent=`${readerFontSize} px`;
+    if(persist) saveState(true);
+  }
+  setReaderFontSize(readerFontSize,false);
   function showPlayer(play=false){document.body.classList.add('player-active');if(play){openFullText('player',true);return;} $('playerPanel').scrollIntoView({behavior:'smooth',block:'start'});}
   function updateResumeCard(){
     const c=chapters[current]; if(!c)return;
@@ -515,7 +560,14 @@ body>header{position:relative;top:auto;flex:0 0 auto;min-height:62px;padding-lef
         span.textContent=w.text;
         span.dataset.i=String(i);
         frag.appendChild(span);
-        if(w.spaceAfter) { const space=document.createElement('span'); space.className='word-space'; space.textContent=w.spaceAfter; frag.appendChild(space); }
+        const rawSpace=String(w.spaceAfter||'').replace(/\r\n?/g,'\n');
+        if(rawSpace){
+          if(/\n[ \t]*\n/.test(rawSpace)){
+            const paragraph=document.createElement('span'); paragraph.className='paragraph-break'; paragraph.setAttribute('aria-hidden','true'); frag.appendChild(paragraph);
+          }else if(/\s/.test(rawSpace)){
+            const space=document.createElement('span'); space.className='word-space'; space.textContent=' '; frag.appendChild(space);
+          }
+        }
         wordRecords.push({start:Number(w.start)||0,end:Number(w.end)||0,el:span});
       });
       reader.appendChild(frag);
@@ -711,6 +763,23 @@ body>header{position:relative;top:auto;flex:0 0 auto;min-height:62px;padding-lef
   $('back10FullBtn').addEventListener('click',()=>{audio.currentTime=Math.max(0,audio.currentTime-10);});
   $('forward10FullBtn').addEventListener('click',()=>{audio.currentTime=Math.min(Number.isFinite(audio.duration)?audio.duration:Infinity,audio.currentTime+10);});
   $('settingsBtn').addEventListener('click',()=>{ $('settingsSheet').hidden=!$('settingsSheet').hidden; revealControls(); });
+  $('readerFontDownBtn').addEventListener('click',()=>setReaderFontSize(readerFontSize-1));
+  $('readerFontUpBtn').addEventListener('click',()=>setReaderFontSize(readerFontSize+1));
+  function touchDistance(touches){const dx=touches[0].clientX-touches[1].clientX,dy=touches[0].clientY-touches[1].clientY;return Math.hypot(dx,dy);}
+  reader.addEventListener('touchstart',e=>{
+    if(e.touches.length===2){pinchStartDistance=touchDistance(e.touches);pinchStartFontSize=readerFontSize;}
+  },{passive:true});
+  reader.addEventListener('touchmove',e=>{
+    if(e.touches.length===2&&pinchStartDistance>0){
+      e.preventDefault();
+      const ratio=touchDistance(e.touches)/pinchStartDistance;
+      const next=Math.max(17,Math.min(38,Math.round(pinchStartFontSize*ratio)));
+      if(next!==readerFontSize)setReaderFontSize(next,false);
+    }
+  },{passive:false});
+  const finishPinch=()=>{if(pinchStartDistance>0){pinchStartDistance=0;saveState(true);}};
+  reader.addEventListener('touchend',finishPinch,{passive:true});
+  reader.addEventListener('touchcancel',finishPinch,{passive:true});
   function revealControls(){ $('textFullscreen').classList.add('controls-visible'); if(controlsHideTimer!==null)clearTimeout(controlsHideTimer); scheduleControlsHide(); }
   function scheduleControlsHide(){ if(controlsHideTimer!==null)clearTimeout(controlsHideTimer); controlsHideTimer=setTimeout(()=>{ if(textFullscreen && !$('settingsSheet').matches(':hover') && ! $('settingsSheet').contains(document.activeElement)) { $('textFullscreen').classList.remove('controls-visible'); $('settingsSheet').hidden=true; } },3500); }
   $('textFullscreen').addEventListener('pointerdown',e=>{ if(e.target.closest('.text-fullscreen-head,.settings-sheet')){ revealControls(); return; } if(!$('textFullscreen').classList.contains('controls-visible')) revealControls(); else scheduleControlsHide(); });
