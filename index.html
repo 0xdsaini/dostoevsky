@@ -122,6 +122,37 @@ audio{margin:20px 0 12px} .status{border-radius:14px;background:color-mix(in srg
 @media(hover:none){.text-fullscreen-head{box-shadow:0 6px 24px rgba(0,0,0,.1)}}
 
 
+/* Fix the reading-mode transport: rewind, play and forward must sit in one horizontal row. */
+.dock-transport{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:2px!important;
+  flex:0 0 auto!important;
+  white-space:nowrap!important;
+}
+.dock-transport > button{position:relative;top:0!important;align-self:center!important;margin:0!important;}
+.text-fullscreen-head .dock-transport .skip-ten{width:36px;height:40px;min-width:36px;min-height:40px;padding:0;display:grid;place-items:center;}
+.text-fullscreen-head .dock-transport .skip-ten svg{width:28px!important;height:28px!important;flex:0 0 28px!important;display:block!important;}
+.text-fullscreen-head .dock-transport .dock-play{width:42px;height:42px;min-width:42px;min-height:42px;}
+@media(max-width:600px){
+  .text-fullscreen-head{gap:1px;padding:4px;}
+  .text-fullscreen-head button{width:31px;height:34px;min-width:31px;min-height:34px;}
+  .text-fullscreen-head .dock-play{width:37px;height:37px;min-width:37px;min-height:37px;}
+  .text-fullscreen-head .dock-transport .skip-ten{width:30px;height:34px;min-width:30px;min-height:34px;}
+  .text-fullscreen-head .dock-transport .skip-ten svg{width:26px!important;height:26px!important;flex:0 0 26px!important;}
+  .dock-divider{height:18px;margin:0 1px;}
+}
+@media(max-width:360px){
+  .text-fullscreen-head{gap:0;padding:3px;}
+  .text-fullscreen-head button{width:28px;height:32px;min-width:28px;min-height:32px;}
+  .text-fullscreen-head .dock-play{width:35px;height:35px;min-width:35px;min-height:35px;}
+  .text-fullscreen-head .dock-transport .skip-ten{width:27px;height:32px;min-width:27px;min-height:32px;}
+  .text-fullscreen-head .dock-transport .skip-ten svg{width:24px!important;height:24px!important;flex:0 0 24px!important;}
+  .dock-divider{width:1px;margin:0;}
+}
+
 /* Book-first home screen */
 body{background:var(--bg)}
 header{position:relative;max-width:1120px;margin:0 auto;border:0;background:transparent;box-shadow:none;padding:22px 24px 8px}
@@ -173,12 +204,39 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
 .np-seek::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--text)}
 .np-transport button:focus-visible,.text-fullscreen-head button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(max-height:560px){.np-main{width:min(100%,600px);display:grid;grid-template-columns:minmax(110px,32%) minmax(0,1fr);column-gap:22px;align-items:center}.np-artwork{grid-row:1/5;grid-column:1;width:min(32vw,45vh,210px);margin:0}.np-bookline,.np-timeline,.np-transport{grid-column:2}.np-bookline{align-self:end}.np-timeline{align-self:center}.np-transport{align-self:start}.np-topline{margin-bottom:10px}}
+
+/* Full-screen app shell: the library is a full-height first screen, not a webpage card. */
+html,body{width:100%;height:100%;min-height:100%;overflow:hidden}
+body{height:100vh;height:100dvh;min-height:0;display:flex;flex-direction:column}
+body>header{position:relative;top:auto;flex:0 0 auto;min-height:62px;padding-left:clamp(18px,4vw,52px);padding-right:clamp(18px,4vw,52px)}
+.home-wrap{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;max-width:1320px;width:100%;margin:0 auto;padding:clamp(14px,2.6vh,28px) clamp(18px,4vw,52px) 24px}
+.book-hero{min-height:clamp(230px,42vh,370px);grid-template-columns:minmax(130px,clamp(145px,18vw,220px)) minmax(0,1fr);gap:clamp(24px,5vw,72px);padding:clamp(20px,3.5vw,48px)}
+.book-cover{max-height:min(31vh,310px);justify-self:center}
+.hero-author{margin-bottom:clamp(12px,2vh,24px)}.hero-meta{margin-bottom:clamp(12px,2vh,22px)}
+.section-heading{margin-top:clamp(16px,2.7vh,28px);margin-bottom:12px}.part-grid{gap:clamp(8px,1.2vw,14px)}.part-card{min-height:clamp(82px,13vh,122px)}
+.footer{display:none!important}
+#mainLayout{display:none}.player-active .home-wrap{display:none}.player-active #mainLayout{display:block;flex:1;min-height:0;overflow:auto;width:100%;max-width:1100px;margin:0 auto;padding:18px clamp(14px,3vw,32px)}
+.icon-button svg,.resume-icon svg,.home-actions svg,.section-heading svg,.back-home svg{width:19px;height:19px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.resume-icon svg{width:20px;height:20px;fill:currentColor;stroke:none}.icon-button{display:grid;place-items:center;width:42px;height:42px;min-width:42px;padding:0}.icon-button svg path:first-child{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.seek-btn svg,.skip-ten svg{width:32px;height:32px;display:block;flex:0 0 32px;overflow:visible}.seek-btn svg path,.skip-ten svg path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.seek-btn svg text,.skip-ten svg text{font:700 9px -apple-system,BlinkMacSystemFont,sans-serif;fill:currentColor;stroke:none}
+#themeBtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.home-actions button{display:inline-flex;align-items:center;justify-content:center;gap:9px}.section-heading>button{display:inline-flex;align-items:center;gap:7px}.resume-top>.primary svg{width:19px;height:19px;fill:currentColor;stroke:none}.icon-button svg.play-glyph,.icon-button svg.play-glyph path{fill:currentColor;stroke:none}
+.np-transport button svg,.text-fullscreen-head button svg{width:20px;height:20px;display:block;flex:0 0 auto;overflow:visible}.np-transport button.skip-ten svg,.text-fullscreen-head button.skip-ten svg{width:32px;height:32px;display:block;flex:0 0 32px}.np-transport button svg path,.text-fullscreen-head button#settingsBtn svg path{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.text-fullscreen-head button#settingsBtn svg{width:20px;height:20px;display:block;flex:0 0 20px}.np-transport .np-play svg,.dock-play svg{width:23px;height:23px;fill:currentColor;stroke:none}.np-transport .np-play svg path,.dock-play svg path{fill:currentColor;stroke:none}
+@media(max-width:700px){body>header{min-height:56px;padding:10px 16px}.home-wrap{padding:12px 14px 18px}.book-hero{min-height:0;grid-template-columns:86px minmax(0,1fr);gap:16px;padding:16px}.book-cover{width:86px;max-height:190px;padding:9px}.cover-title{font-size:23px}.hero-copy h1{font-size:clamp(28px,8vw,38px)}.hero-author{margin-bottom:10px}.hero-meta{font-size:11px;margin-bottom:12px}.resume-card{padding:10px}.resume-icon{width:34px;height:34px}.resume-top{gap:9px}.resume-top>.primary{width:38px;height:38px;min-width:38px}.section-heading{margin-top:18px}.section-heading h2{font-size:19px}.section-heading p{font-size:12px}.part-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.part-card{min-height:80px;padding:11px;gap:5px}.part-card .part-name{font-size:14px}.part-card .part-count{font-size:11px}.home-actions{margin-top:10px}.home-actions button{min-height:36px;padding:7px 11px;font-size:12px}}
+@media(max-height:720px) and (min-width:701px){.book-hero{min-height:220px;padding:22px}.book-cover{max-height:230px}.section-heading{margin-top:14px}.part-card{min-height:78px;padding:12px;gap:6px}.home-wrap{padding-top:12px}}
+
+
+/* Icon corrections v4: horizontal, upper-arc arrowheads and truly centered settings control. */
+.skip-ten svg{width:32px!important;height:32px!important;display:block!important;flex:0 0 32px!important;overflow:visible!important;align-self:center!important;transform:none!important}
+.skip-ten svg text{font-size:9px;dominant-baseline:alphabetic}
+.text-fullscreen-head #settingsBtn{display:grid!important;place-items:center!important;align-self:center!important;position:relative!important;top:0!important;transform:none!important;padding:0!important;line-height:0!important}
+.text-fullscreen-head #settingsBtn svg{width:20px!important;height:20px!important;display:block!important;flex:none!important;margin:0!important;align-self:center!important;justify-self:center!important;transform:none!important;overflow:visible}
 </style>
 </head>
 <body>
 <header>
   <div><div class="brand">The Idiot</div><div class="sub">Audiobook · Read along</div></div>
-  <button id="themeBtn" type="button" aria-label="Toggle dark mode" title="Appearance">☾</button>
+  <button id="themeBtn" type="button" aria-label="Toggle dark mode" title="Appearance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.2A8.4 8.4 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"/></svg></button>
 </header>
 <section class="home-wrap" id="homeScreen">
   <div class="book-hero">
@@ -189,13 +247,13 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
       <div class="hero-author">Fyodor Dostoevsky</div>
       <div class="hero-meta">50 chapters <span aria-hidden="true">·</span> Audiobook and synchronized read-along</div>
       <div class="resume-card">
-        <div class="resume-top"><div class="resume-icon" aria-hidden="true">▶</div><div class="resume-copy"><div class="resume-title" id="resumeLabel">Continue listening</div><div class="resume-detail" id="resumeDetail">Part I · Chapter 01</div></div><button id="resumeBtn" class="primary" type="button" aria-label="Continue listening" title="Continue listening">▶</button></div>
+        <div class="resume-top"><div class="resume-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></div><div class="resume-copy"><div class="resume-title" id="resumeLabel">Continue listening</div><div class="resume-detail" id="resumeDetail">Part I · Chapter 01</div></div><button id="resumeBtn" class="primary icon-button" type="button" aria-label="Continue listening" title="Continue listening"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></button></div>
         <div class="resume-progress"><span id="resumeProgress"></span></div><div class="resume-foot"><span id="resumePosition">Ready when you are</span><span id="resumePercent">0%</span></div>
       </div>
-      <div class="home-actions"><button id="browseBtn" class="browse-btn" type="button"><span aria-hidden="true">☷</span> Browse chapters</button></div>
+      <div class="home-actions"><button id="browseBtn" class="browse-btn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 4v4M15 10v4M10 16v4"/></svg> Browse chapters</button></div>
     </div>
   </div>
-  <div class="section-heading"><div><h2>Explore the book</h2><p>Pick up where you left off or choose a part.</p></div><button id="allChaptersBtn" type="button" class="browse-btn">All chapters <span aria-hidden="true">↗</span></button></div>
+  <div class="section-heading"><div><h2>Explore the book</h2><p>Pick up where you left off or choose a part.</p></div><button id="allChaptersBtn" type="button" class="browse-btn">All chapters <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></button></div>
   <div class="part-grid" id="partCards">
     <button type="button" class="part-card" data-part="1"><span class="part-number">PART I</span><span class="part-name">The beginning</span><span class="part-count">16 chapters</span></button>
     <button type="button" class="part-card" data-part="2"><span class="part-number">PART II</span><span class="part-name">The return</span><span class="part-count">12 chapters</span></button>
@@ -206,18 +264,18 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
 <main class="layout" id="mainLayout">
   <section class="panel player-panel" id="playerPanel">
     <div class="now">
-      <button id="homeBtn" type="button" class="back-home" aria-label="Back to book home">‹ <span>Library</span></button>
+      <button id="homeBtn" type="button" class="back-home" aria-label="Back to book home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span>Library</span></button>
       <div class="eyebrow" id="partLabel">PART I</div>
       <h1 class="chapter-title" id="chapterTitle">Chapter 01</h1>
       <div class="filename" id="fileLabel">Part_I_Chapter_01.mp3</div>
       <audio id="audio" controls preload="metadata"></audio>
       <div class="controls">
-        <button id="prevBtn" type="button" aria-label="Previous chapter" title="Previous chapter">‹</button>
-        <button id="back10Btn" type="button" class="seek-btn" aria-label="Back 10 seconds" title="Back 10 seconds">↶10</button>
-        <button id="playBtn" class="primary" type="button" aria-label="Play or pause" title="Play or pause">▶</button>
-        <button id="forward10Btn" type="button" class="seek-btn" aria-label="Forward 10 seconds" title="Forward 10 seconds">10↷</button>
-        <button id="nextBtn" type="button" aria-label="Next chapter" title="Next chapter">›</button>
-        <button id="restartBtn" type="button" aria-label="Restart chapter" title="Restart chapter">↺</button>
+        <button id="prevBtn" type="button" class="icon-button" aria-label="Previous chapter" title="Previous chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button id="back10Btn" type="button" class="seek-btn icon-button" aria-label="Back 10 seconds" title="Back 10 seconds"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M8.5 7.5A11 11 0 1 1 5.2 16.8"/><path d="M8.5 7.5H4.2M8.5 7.5 7.1 3.4"/><text x="17" y="19" text-anchor="middle">10</text></svg></button>
+        <button id="playBtn" class="primary icon-button" type="button" aria-label="Play or pause" title="Play or pause"><svg class="play-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></button>
+        <button id="forward10Btn" type="button" class="seek-btn icon-button" aria-label="Forward 10 seconds" title="Forward 10 seconds"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M23.5 7.5A11 11 0 1 0 26.8 16.8"/><path d="M23.5 7.5h4.3M23.5 7.5l1.4-4.1"/><text x="15" y="19" text-anchor="middle">10</text></svg></button>
+        <button id="nextBtn" type="button" class="icon-button" aria-label="Next chapter" title="Next chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+        <button id="restartBtn" class="icon-button" type="button" aria-label="Restart chapter" title="Restart chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2.6 6.4M3 4v7h7"/></svg></button>
         <label class="sub" for="playbackRate" title="Playback speed">×</label><button id="slowerBtn" type="button" aria-label="Decrease playback speed">−</button><select id="playbackRate" class="speed-select" aria-label="Audio playback speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="1.75">1.75×</option><option value="2">2×</option><option value="2.5">2.5×</option><option value="3">3×</option></select><button id="fasterBtn" type="button" aria-label="Increase playback speed">+</button>
       </div>
       <div class="progressline"><span id="timeCurrent">0:00</span><span id="timeDuration">0:00</span></div>
@@ -256,10 +314,10 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
         <div class="np-times"><span id="npTimeCurrent">0:00</span><span id="npTimeDuration">0:00</span></div>
       </div>
       <div class="np-transport" aria-label="Playback controls">
-        <button id="fullPrevBtn" class="np-secondary" type="button" aria-label="Previous chapter" title="Previous chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14M19 6l-9 6 9 6z"/></svg></button>
-        <button id="npBack10Btn" class="np-secondary skip-ten" type="button" aria-label="Back 10 seconds" title="Back 10 seconds"><svg viewBox="0 0 32 28" aria-hidden="true"><path d="M8 8H3V3M4 8a11 11 0 1 1-1 10"/><text x="16" y="17" text-anchor="middle">10</text></svg></button>
-        <button id="npPlayBtn" class="np-play" type="button" aria-label="Play audiobook" title="Play">▶</button>
-        <button id="npForward10Btn" class="np-secondary skip-ten" type="button" aria-label="Forward 10 seconds" title="Forward 10 seconds"><svg viewBox="0 0 32 28" aria-hidden="true"><path d="M24 8h5V3M28 8a11 11 0 1 0 1 10"/><text x="16" y="17" text-anchor="middle">10</text></svg></button>
+        <button id="fullPrevBtn" class="np-secondary" type="button" aria-label="Previous chapter" title="Previous chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M19 6l-10 6 10 6z"/></svg></button>
+        <button id="npBack10Btn" class="np-secondary skip-ten" type="button" aria-label="Back 10 seconds" title="Back 10 seconds"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M8.5 7.5A11 11 0 1 1 5.2 16.8"/><path d="M8.5 7.5H4.2M8.5 7.5 7.1 3.4"/><text x="17" y="19" text-anchor="middle">10</text></svg></button>
+        <button id="npPlayBtn" class="np-play" type="button" aria-label="Play audiobook" title="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></button>
+        <button id="npForward10Btn" class="np-secondary skip-ten" type="button" aria-label="Forward 10 seconds" title="Forward 10 seconds"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M23.5 7.5A11 11 0 1 0 26.8 16.8"/><path d="M23.5 7.5h4.3M23.5 7.5l1.4-4.1"/><text x="15" y="19" text-anchor="middle">10</text></svg></button>
         <button id="fullNextBtn" class="np-secondary" type="button" aria-label="Next chapter" title="Next chapter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5v14M5 6l9 6-9 6z"/></svg></button>
       </div>
     </div>
@@ -270,12 +328,12 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
     <button id="rsvpModeBtn" type="button" aria-pressed="false" aria-label="RSVP word mode" title="RSVP word mode"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
     <span class="dock-divider dock-transport-divider" aria-hidden="true"></span>
     <div class="dock-transport" aria-label="Playback controls">
-      <button id="back10FullBtn" type="button" aria-label="Back 10 seconds" title="Back 10 seconds">↶</button>
-      <button id="fullPlayBtn" type="button" class="dock-play" aria-label="Play or pause audiobook" title="Play or pause">▶</button>
-      <button id="forward10FullBtn" type="button" aria-label="Forward 10 seconds" title="Forward 10 seconds">↷</button>
+      <button id="back10FullBtn" type="button" class="skip-ten" aria-label="Back 10 seconds" title="Back 10 seconds"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M8.5 7.5A11 11 0 1 1 5.2 16.8"/><path d="M8.5 7.5H4.2M8.5 7.5 7.1 3.4"/><text x="17" y="19" text-anchor="middle">10</text></svg></button>
+      <button id="fullPlayBtn" type="button" class="dock-play" aria-label="Play or pause audiobook" title="Play or pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></button>
+      <button id="forward10FullBtn" type="button" class="skip-ten" aria-label="Forward 10 seconds" title="Forward 10 seconds"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M23.5 7.5A11 11 0 1 0 26.8 16.8"/><path d="M23.5 7.5h4.3M23.5 7.5l1.4-4.1"/><text x="15" y="19" text-anchor="middle">10</text></svg></button>
     </div>
     <span class="dock-divider" aria-hidden="true"></span>
-    <button id="settingsBtn" type="button" aria-label="Playback settings" title="Playback settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="M19.4 15.2a7.7 7.7 0 0 0 0-2.4l1.4-1.1-1.5-2.6-1.7.6a7.6 7.6 0 0 0-2-1.2L15.3 6h-3l-.3 2.5a7.6 7.6 0 0 0-2 1.2l-1.7-.6-1.5 2.6 1.4 1.1a7.7 7.7 0 0 0 0 2.4l-1.4 1.1 1.5 2.6 1.7-.6a7.6 7.6 0 0 0 2 1.2l.3 2.5h3l.3-2.5a7.6 7.6 0 0 0 2-1.2l1.7.6 1.5-2.6z" transform="translate(-.8 -1.5) scale(1.06)"/></svg></button>
+    <button id="settingsBtn" type="button" aria-label="Playback settings" title="Playback settings"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z"/><path d="m19.4 15 .06.06a1.7 1.7 0 0 1-2.4 2.4l-.06-.06a1.7 1.7 0 0 0-2.9 1.2v.1a1.7 1.7 0 0 1-3.4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.06.06a1.7 1.7 0 0 1-2.4-2.4l.06-.06a1.7 1.7 0 0 0-1.2-2.9h-.1a1.7 1.7 0 0 1 0-3.4h.1a1.7 1.7 0 0 0 1.2-2.9l-.06-.06a1.7 1.7 0 0 1 2.4-2.4l.06.06a1.7 1.7 0 0 0 2.9-1.2v-.1a1.7 1.7 0 0 1 3.4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.06-.06a1.7 1.7 0 0 1 2.4 2.4l-.06.06a1.7 1.7 0 0 0 1.2 2.9h.1a1.7 1.7 0 0 1 0 3.4h-.1a1.7 1.7 0 0 0-1.2 2.9Z"/></svg></button>
     <button id="closeFullTextBtn" type="button" aria-label="Minimize player" title="Minimize player"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
   </div>
   <div id="settingsSheet" class="settings-sheet" hidden>
@@ -484,6 +542,14 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
     if(i<0)i=playbackRates.length-1;
     setPlaybackRate(playbackRates[Math.max(0,Math.min(playbackRates.length-1,i+direction))]);
   }
+  async function enterAppFullscreen() {
+    if(document.fullscreenElement || !document.documentElement.requestFullscreen) return;
+    try { await document.documentElement.requestFullscreen({navigationUI:'hide'}); }
+    catch(firstError) { try { await document.documentElement.requestFullscreen(); } catch(e) {} }
+  }
+  // Request native fullscreen on the first user gesture. The CSS app shell remains full-viewport if the browser declines.
+  document.addEventListener('pointerdown', enterAppFullscreen, {capture:true, once:true});
+  document.addEventListener('keydown', enterAppFullscreen, {capture:true, once:true});
   async function openFullText(mode='guided', autoplay=false) {
     if(textFullscreen) { setFullscreenMode(mode); if(autoplay) audio.play().catch(()=>{}); revealControls(); return; }
     $('textFullscreen').appendChild(reader);
@@ -494,16 +560,9 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
     textFullscreen=true; $('textFullscreen').classList.add('controls-visible'); scheduleControlsHide();
     setFullscreenMode(mode);
     if(autoplay) audio.play().catch(()=>setStatus('Could not start playback. Check that the MP3 exists in build/audio_in/merged_chapters/.','warn'));
-    // Use the browser's real fullscreen API where supported (not just a CSS overlay).
-    // navigationUI:'hide' is a hint; iOS Safari may require Add to Home Screen instead.
-    try {
-      const el=$('textFullscreen');
-      if(!document.fullscreenElement && el.requestFullscreen) {
-        try { await el.requestFullscreen({navigationUI:'hide'}); }
-        catch(firstError) { await el.requestFullscreen(); }
-        fullscreenRequested=true;
-      }
-    } catch(e) { fullscreenRequested=false; }
+    // Fullscreen belongs to the whole app, not just the player, so changing views never exits it.
+    await enterAppFullscreen();
+    fullscreenRequested=!!document.fullscreenElement;
     $('closeFullTextBtn').focus();
     requestAnimationFrame(()=>{
       if(lastWord>=0 && wordRecords[lastWord]) {
@@ -525,10 +584,8 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
     document.body.classList.remove('text-open');
     $('fullTextBtn').textContent='⛶'; $('fullTextBtn').title='Open synchronized text'; $('fullTextBtn').setAttribute('aria-label','Open synchronized text');
     textFullscreen=false;
-    if(document.fullscreenElement && document.exitFullscreen) {
-      try { await document.exitFullscreen(); } catch(e) {}
-    }
-    fullscreenRequested=false;
+    // Deliberately keep the whole app in fullscreen when returning to the library.
+    fullscreenRequested=!!document.fullscreenElement;
     document.body.classList.remove('player-active');
     updateResumeCard();
     $('resumeBtn').focus();
@@ -600,8 +657,8 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
   $('playbackRate').addEventListener('change',()=>setPlaybackRate(Number($('playbackRate').value)));
   $('fullTextBtn').addEventListener('click',()=>openFullText('guided',false));
   $('closeFullTextBtn').addEventListener('click',closeFullText);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&textFullscreen){e.preventDefault();closeFullText();}});
-  document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement && textFullscreen && fullscreenRequested){fullscreenRequested=false;closeFullText();}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&textFullscreen){e.preventDefault();revealControls();}});
+  document.addEventListener('fullscreenchange',()=>{fullscreenRequested=!!document.fullscreenElement;});
   $('followBtn').addEventListener('click',()=>{
     followAudio=!followAudio;
     $('followBtn').textContent=followAudio?'◎':'○'; $('followBtn').title=followAudio?'Follow audio is on':'Follow audio is off'; $('followBtn').setAttribute('aria-pressed',String(followAudio));
@@ -622,7 +679,7 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
     audio.src=c.src; audio.load();
     loadReader(c);
     updateResumeCard(); saveState(true);
-    $('playBtn').textContent='▶';
+    $('playBtn').innerHTML='<svg class="play-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
     renderList();
     setStatus(c.available===false?'Audio file not found. Check that it exists in build/audio_in/merged_chapters/.':c.available===true?'Ready to play.':'Trying to load audio…',c.available===false?'warn':'');
     if(autoplay) audio.play().catch(()=>setStatus('Could not start playback. Check that the MP3 exists in audio_in/.','warn'));
@@ -633,8 +690,8 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
   $('back10Btn')?.addEventListener('click',()=>{audio.currentTime=Math.max(0,audio.currentTime-10);});
   $('forward10Btn')?.addEventListener('click',()=>{audio.currentTime=Math.min(Number.isFinite(audio.duration)?audio.duration:Infinity,audio.currentTime+10);});
   $('restartBtn').addEventListener('click',()=>{audio.currentTime=0;audio.play().catch(()=>{});});
-  audio.addEventListener('play',()=>{$('playBtn').textContent='Ⅱ';$('fullPlayBtn').textContent='Ⅱ';$('fullPlayBtn').setAttribute('aria-label','Pause audiobook');$('fullPlayBtn').title='Pause';$('npPlayBtn').textContent='Ⅱ';$('npPlayBtn').setAttribute('aria-label','Pause audiobook');$('npPlayBtn').title='Pause';if(textFullscreen&&fullscreenMode==='rsvp')scheduleNextRsvpWord();saveState(true);});
-  audio.addEventListener('pause',()=>{$('playBtn').textContent='▶';$('fullPlayBtn').textContent='▶';$('fullPlayBtn').setAttribute('aria-label','Play audiobook');$('fullPlayBtn').title='Play';$('npPlayBtn').textContent='▶';$('npPlayBtn').setAttribute('aria-label','Play audiobook');$('npPlayBtn').title='Play';stopRsvpScheduler();saveState(true);updateResumeCard();});
+  audio.addEventListener('play',()=>{$('playBtn').innerHTML='<svg class="play-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM15 5h4v14h-4z"/></svg>';$('fullPlayBtn').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM15 5h4v14h-4z"/></svg>';$('fullPlayBtn').setAttribute('aria-label','Pause audiobook');$('fullPlayBtn').title='Pause';$('npPlayBtn').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM15 5h4v14h-4z"/></svg>';$('npPlayBtn').setAttribute('aria-label','Pause audiobook');$('npPlayBtn').title='Pause';if(textFullscreen&&fullscreenMode==='rsvp')scheduleNextRsvpWord();saveState(true);});
+  audio.addEventListener('pause',()=>{$('playBtn').innerHTML='<svg class="play-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';$('fullPlayBtn').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';$('fullPlayBtn').setAttribute('aria-label','Play audiobook');$('fullPlayBtn').title='Play';$('npPlayBtn').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';$('npPlayBtn').setAttribute('aria-label','Play audiobook');$('npPlayBtn').title='Play';stopRsvpScheduler();saveState(true);updateResumeCard();});
   audio.addEventListener('ratechange',()=>{const rate=audio.playbackRate;$('playbackRate').value=String(playbackRates.reduce((a,b)=>Math.abs(b-rate)<Math.abs(a-rate)?b:a,playbackRates[0]));$('fullSpeedReadout').textContent=`${rate}×`;if(textFullscreen&&fullscreenMode==='rsvp'&&!audio.paused)scheduleNextRsvpWord();saveState(true);});
   function updateNowPlayingProgress(){const duration=Number.isFinite(audio.duration)?audio.duration:0,time=Number.isFinite(audio.currentTime)?audio.currentTime:0,pct=duration>0?Math.max(0,Math.min(100,time/duration*100)):0;$('npTimeCurrent').textContent=fmt(time);$('npTimeDuration').textContent=fmt(duration);$('fullSeek').style.setProperty('--seek-progress',`${pct}%`);if(duration>0&&!$('fullSeek').matches(':active'))$('fullSeek').value=String(Math.round(time/duration*1000));}
   function updateNowPlayingLabels(){const c=chapters[current];if(!c)return;$('npChapterTitle').textContent=`Chapter ${String(c.ch).padStart(2,'0')}`;$('npPartLabel').textContent=`Part ${roman[c.part]}`;$('fullChapterLabel').textContent=`THE IDIOT · PART ${roman[c.part]} · CHAPTER ${String(c.ch).padStart(2,'0')}`;}
@@ -646,16 +703,16 @@ header{position:relative;max-width:1120px;margin:0 auto;border:0;background:tran
   $('search').addEventListener('input',renderList);
   function choosePart(part){filterPart=String(part);$('search').value='';document.querySelectorAll('#filters .filter').forEach(x=>x.classList.toggle('active',x.dataset.part===filterPart));document.querySelectorAll('#partCards [data-part]').forEach(x=>x.classList.toggle('active',x.dataset.part===filterPart));renderList();saveState(true);$('chapterPanel').scrollIntoView({behavior:'smooth',block:'start'});}
   $('filters').addEventListener('click',e=>{const b=e.target.closest('button[data-part]');if(!b)return;choosePart(b.dataset.part);});
-  $('partCards').addEventListener('click',e=>{const b=e.target.closest('button[data-part]');if(!b)return;choosePart(b.dataset.part);});
-  $('allChaptersBtn').addEventListener('click',()=>choosePart('all'));
-  $('browseBtn').addEventListener('click',()=>{$('chapterPanel').scrollIntoView({behavior:'smooth',block:'start'});$('search').focus({preventScroll:true});});
+  $('partCards').addEventListener('click',e=>{const b=e.target.closest('button[data-part]');if(!b)return;choosePart(b.dataset.part);document.body.classList.add('player-active');$('chapterPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+  $('allChaptersBtn').addEventListener('click',()=>{choosePart('all');document.body.classList.add('player-active');$('chapterPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+  $('browseBtn').addEventListener('click',()=>{document.body.classList.add('player-active');$('chapterPanel').scrollIntoView({behavior:'smooth',block:'start'});$('search').focus({preventScroll:true});});
   $('resumeBtn').addEventListener('click',()=>{document.body.classList.add('player-active');openFullText('player',true);});
   $('homeBtn').addEventListener('click',()=>{audio.pause();document.body.classList.remove('player-active');window.scrollTo({top:0,behavior:'smooth'});updateResumeCard();});
   window.addEventListener('pagehide',()=>saveState(true));
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveState(true);});
-  $('themeBtn').addEventListener('click',()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';$('themeBtn').textContent=dark?'☀':'☾'; $('themeBtn').title=dark?'Light appearance':'Dark appearance';try{localStorage.setItem('audiobook-theme',dark?'dark':'light')}catch(e){}saveState(true);});
+  $('themeBtn').addEventListener('click',()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';$('themeBtn').innerHTML=dark?'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.2A8.4 8.4 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"/></svg>'; $('themeBtn').title=dark?'Light appearance':'Dark appearance';try{localStorage.setItem('audiobook-theme',dark?'dark':'light')}catch(e){}saveState(true);});
   const initialTheme=savedState.theme || (()=>{try{return localStorage.getItem('audiobook-theme')||'light'}catch(e){return 'light'}})();
-  document.documentElement.dataset.theme=initialTheme==='dark'?'dark':'light';$('themeBtn').textContent=initialTheme==='dark'?'☀':'☾';$('themeBtn').title=initialTheme==='dark'?'Light appearance':'Dark appearance';
+  document.documentElement.dataset.theme=initialTheme==='dark'?'dark':'light';$('themeBtn').innerHTML=initialTheme==='dark'?'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.2A8.4 8.4 0 0 1 8.8 3.8 8.6 8.6 0 1 0 20.2 15.2Z"/></svg>'; $('themeBtn').title=initialTheme==='dark'?'Light appearance':'Dark appearance';
   // Restore playback speed and the saved reader preferences.
   audio.playbackRate=playbackRates.includes(Number(savedState.playbackRate))?Number(savedState.playbackRate):1;
   $('playbackRate').value=String(audio.playbackRate);$('fullSpeedReadout').textContent=`${audio.playbackRate}×`;
