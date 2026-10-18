@@ -231,6 +231,72 @@ body>header{position:relative;top:auto;flex:0 0 auto;min-height:62px;padding-lef
 .skip-ten svg text{font-size:9px;dominant-baseline:alphabetic}
 .text-fullscreen-head #settingsBtn{display:grid!important;place-items:center!important;align-self:center!important;position:relative!important;top:0!important;transform:none!important;padding:0!important;line-height:0!important}
 .text-fullscreen-head #settingsBtn svg{width:20px!important;height:20px!important;display:block!important;flex:none!important;margin:0!important;align-self:center!important;justify-self:center!important;transform:none!important;overflow:visible}
+
+
+/* Larger, thumb-friendly reading controls. On phones, give transport its own
+   horizontal row and place the mode/settings actions on a second row. */
+.text-fullscreen-head button{
+  width:48px;height:48px;min-width:48px;min-height:48px;
+}
+.text-fullscreen-head button svg{width:25px;height:25px;flex:0 0 25px}
+.text-fullscreen-head button.skip-ten{width:48px;height:50px;min-width:48px;min-height:50px}
+.text-fullscreen-head button.skip-ten svg{width:36px!important;height:36px!important;flex:0 0 36px!important}
+.text-fullscreen-head .dock-play{width:56px;height:56px;min-width:56px;min-height:56px}
+.text-fullscreen-head .dock-play svg{width:28px;height:28px}
+@media(max-width:600px){
+  .text-fullscreen-head{
+    left:50%!important;right:auto!important;transform:translateX(-50%);
+    bottom:calc(5.5vh + env(safe-area-inset-bottom,0px))!important;
+    display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;
+    justify-content:center!important;align-items:center!important;
+    gap:5px!important;padding:9px!important;
+    width:max-content;max-width:calc(100vw - 20px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));
+    border-radius:27px;
+  }
+  /* Keep the three playback actions together in a large, unmistakably
+     horizontal transport row above the secondary controls. */
+  .text-fullscreen-head .dock-transport{
+    order:-1!important;flex:0 0 100%!important;width:100%!important;
+    display:flex!important;flex-direction:row!important;align-items:center!important;
+    justify-content:center!important;gap:12px!important;padding:0 0 3px!important;
+  }
+  .text-fullscreen-head .dock-transport-divider{display:none!important}
+  .text-fullscreen-head .dock-divider:not(.dock-transport-divider){display:none!important}
+  .text-fullscreen-head button{
+    width:46px;height:46px;min-width:46px;min-height:46px;
+    border-radius:50%;
+  }
+  .text-fullscreen-head button svg{width:27px;height:27px;flex:0 0 27px}
+  .text-fullscreen-head .dock-transport .skip-ten{
+    width:54px;height:54px;min-width:54px;min-height:54px;
+  }
+  .text-fullscreen-head .dock-transport .skip-ten svg{
+    width:39px!important;height:39px!important;flex:0 0 39px!important;
+  }
+  .text-fullscreen-head .dock-transport .dock-play{
+    width:62px;height:62px;min-width:62px;min-height:62px;
+  }
+  .text-fullscreen-head .dock-transport .dock-play svg{width:30px;height:30px}
+  .text-fullscreen-head button#settingsBtn svg,
+  .text-fullscreen-head button#closeFullTextBtn svg{width:27px;height:27px;flex:0 0 27px}
+  .settings-sheet{bottom:calc(176px + env(safe-area-inset-bottom,0px))}
+  .text-fullscreen .reader{
+    padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))!important;
+    scroll-padding-bottom:190px;
+  }
+  .rsvp-view{
+    padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))!important;
+  }
+}
+@media(max-width:380px){
+  .text-fullscreen-head{gap:3px!important;padding:7px!important;bottom:calc(4.5vh + env(safe-area-inset-bottom,0px))!important}
+  .text-fullscreen-head button{width:43px;height:43px;min-width:43px;min-height:43px}
+  .text-fullscreen-head .dock-transport{gap:9px!important}
+  .text-fullscreen-head .dock-transport .skip-ten{width:51px;height:51px;min-width:51px;min-height:51px}
+  .text-fullscreen-head .dock-transport .skip-ten svg{width:37px!important;height:37px!important;flex:0 0 37px!important}
+  .text-fullscreen-head .dock-transport .dock-play{width:58px;height:58px;min-width:58px;min-height:58px}
+}
+
 </style>
 </head>
 <body>
@@ -734,86 +800,3 @@ body>header{position:relative;top:auto;flex:0 0 auto;min-height:62px;padding-lef
 </script>
 </body>
 </html>
-
-/* Mobile reading dock: larger touch targets, lifted from the bottom edge. */
-@media (max-width: 600px) {
-  .text-fullscreen-head {
-    bottom: calc(34px + env(safe-area-inset-bottom, 0px)) !important;
-    gap: 3px !important;
-    padding: 6px !important;
-    max-width: calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) !important;
-  }
-  .text-fullscreen-head > button {
-    width: 40px !important;
-    height: 42px !important;
-    min-width: 40px !important;
-    min-height: 42px !important;
-    flex: 0 0 40px !important;
-  }
-  .text-fullscreen-head .dock-transport {
-    gap: 2px !important;
-  }
-  .text-fullscreen-head .dock-transport .skip-ten {
-    width: 38px !important;
-    height: 42px !important;
-    min-width: 38px !important;
-    min-height: 42px !important;
-    flex: 0 0 38px !important;
-  }
-  .text-fullscreen-head .dock-transport .skip-ten svg {
-    width: 31px !important;
-    height: 31px !important;
-    flex: 0 0 31px !important;
-  }
-  .text-fullscreen-head .dock-transport .dock-play {
-    width: 46px !important;
-    height: 46px !important;
-    min-width: 46px !important;
-    min-height: 46px !important;
-    flex: 0 0 46px !important;
-  }
-  .text-fullscreen-head > .dock-divider {
-    height: 24px !important;
-    margin: 0 1px !important;
-  }
-  .text-fullscreen-head > button svg {
-    width: 23px !important;
-    height: 23px !important;
-  }
-  .text-fullscreen-head > button#settingsBtn svg {
-    width: 22px !important;
-    height: 22px !important;
-  }
-  /* Reserve space below the prose and RSVP word so the raised dock never covers content. */
-  .text-fullscreen .reader {
-    padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
-    scroll-padding-bottom: 150px !important;
-  }
-  .rsvp-view {
-    padding-bottom: calc(145px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-  .settings-sheet {
-    bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-}
-@media (max-width: 380px) {
-  .text-fullscreen-head {
-    gap: 1px !important;
-    padding: 5px !important;
-  }
-  .text-fullscreen-head > button {
-    width: 36px !important;
-    min-width: 36px !important;
-    flex-basis: 36px !important;
-  }
-  .text-fullscreen-head .dock-transport .skip-ten {
-    width: 34px !important;
-    min-width: 34px !important;
-    flex-basis: 34px !important;
-  }
-  .text-fullscreen-head .dock-transport .dock-play {
-    width: 43px !important;
-    min-width: 43px !important;
-    flex-basis: 43px !important;
-  }
-}
