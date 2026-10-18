@@ -15,7 +15,7 @@ header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px so
 audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
 .reader-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.seek-btn{min-width:86px}
 .text-fullscreen{display:none;position:fixed;inset:0;z-index:1000;background:var(--bg);color:var(--text);width:100%;height:100vh;height:100dvh;padding:0;overflow:hidden}
-.text-fullscreen.open{display:flex;flex-direction:column}.text-fullscreen-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex:0 0 auto}.text-fullscreen-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--bg);flex:0 0 auto}.text-fullscreen-tools .active{background:var(--soft);border-color:var(--accent)}.rsvp-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto}.rsvp-controls select{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px}.rsvp-view{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;overflow:hidden}.rsvp-word{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,7vw,72px);line-height:1.25;overflow-wrap:anywhere}.rsvp-meta{position:absolute;bottom:18px;color:var(--muted);font-size:12px}.text-fullscreen-title{font-weight:700;min-width:0;overflow-wrap:anywhere}.text-fullscreen .reader{flex:1;min-height:0;max-height:none;height:auto;margin:0;padding:clamp(18px,4vw,42px);border:0;border-radius:0;font-size:clamp(19px,2.2vh,25px);line-height:2;overflow:auto;overscroll-behavior:contain}.text-fullscreen .reader-note{font-size:12px;color:var(--muted)}body.text-open{overflow:hidden}[hidden]{display:none!important}.primary{background:var(--accent);border-color:var(--accent);color:white;font-weight:650}.primary:hover{opacity:.9}.progressline{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:4px}
+.text-fullscreen.open{display:flex;flex-direction:column}.text-fullscreen-head{position:absolute;top:10px;right:10px;z-index:2;display:flex;align-items:center;gap:6px;padding:5px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--panel) 88%,transparent);opacity:.22;transition:opacity .2s}.text-fullscreen-head:hover,.text-fullscreen-head:focus-within{opacity:1}.text-fullscreen-head button{padding:6px 9px;font-size:12px}.text-fullscreen-head .active{background:var(--soft);border-color:var(--accent)}.rsvp-view{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;overflow:hidden}.rsvp-word{font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,8vw,80px);line-height:1.25;overflow-wrap:anywhere}.rsvp-meta{display:none}.text-fullscreen .reader{flex:1;min-height:0;max-height:none;height:auto;margin:0;padding:clamp(18px,4vw,42px);border:0;border-radius:0;font-size:clamp(19px,2.2vh,25px);line-height:2;overflow:auto;overscroll-behavior:contain}.text-fullscreen .reader-note{font-size:12px;color:var(--muted)}body.text-open{overflow:hidden}[hidden]{display:none!important}.primary{background:var(--accent);border-color:var(--accent);color:white;font-weight:650}.primary:hover{opacity:.9}.progressline{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:4px}
 .status{padding:12px 14px;border-radius:11px;background:var(--bg);color:var(--muted);font-size:13px;margin-top:17px}.status.good{color:var(--good)}.status.warn{color:var(--bad)}
 .list-head{padding:16px;border-bottom:1px solid var(--line)}.list-head h2{font-size:16px;margin:0 0 10px}.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);outline:none}.search:focus{border-color:var(--accent)}
 .filters{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.filter{padding:5px 9px;font-size:12px;border-radius:999px}.filter.active{background:var(--soft);border-color:var(--accent)}
@@ -75,23 +75,12 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   </aside>
 </main>
 <div id="textFullscreen" class="text-fullscreen" role="dialog" aria-modal="true" aria-label="Full-screen read-along text">
-  <div class="text-fullscreen-head">
-    <div><div id="fullTextTitle" class="text-fullscreen-title">Part I · Chapter 01</div><div id="fullTextNote" class="reader-note">Read along with the audio</div></div>
-    <button id="closeFullTextBtn" type="button" aria-label="Close full-screen text">✕ Close</button>
+  <div class="text-fullscreen-head" aria-label="Text view options">
+    <button id="guidedModeBtn" type="button" class="active" aria-pressed="true">Text</button>
+    <button id="rsvpModeBtn" type="button" aria-pressed="false">RSVP</button>
+    <button id="closeFullTextBtn" type="button" aria-label="Close full-screen text">✕</button>
   </div>
-  <div id="fullTextTools" class="text-fullscreen-tools">
-    <button id="guidedModeBtn" type="button" class="active">Guided text</button>
-    <button id="rsvpModeBtn" type="button">RSVP mode</button>
-    <div id="rsvpControls" class="rsvp-controls" hidden>
-      <label for="rsvpWpm">Speed</label>
-      <select id="rsvpWpm" aria-label="RSVP reading speed">
-        <option value="300">300 WPM</option><option value="400">400 WPM</option><option value="500" selected>500 WPM</option><option value="600">600 WPM</option><option value="700">700 WPM</option><option value="800">800 WPM</option><option value="1000">1000 WPM</option>
-      </select>
-      <button id="rsvpPlayBtn" type="button" class="primary">▶ Start RSVP</button>
-      <button id="rsvpRestartBtn" type="button">↺ Restart</button>
-    </div>
-  </div>
-  <div id="rsvpView" class="rsvp-view" hidden aria-live="off"><div id="rsvpWord" class="rsvp-word">Choose RSVP mode to begin</div><div id="rsvpProgress" class="rsvp-meta"></div></div>
+  <div id="rsvpView" class="rsvp-view" hidden aria-live="off"><div id="rsvpWord" class="rsvp-word"></div></div>
 </div>
 <div class="footer">Host this page as <code>index.html</code> on GitHub Pages. Audio files load from <code>build/audio_in/merged_chapters/</code>; synchronized word data loads from <code>readalong/</code>.</div>
 <script>
@@ -110,7 +99,6 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   const reader=$('reader'), readerHome=reader.parentNode, readerAnchor=reader.nextSibling;
   let textFullscreen=false, fullscreenMode='guided';
   let current=0, filterPart='all', wordRecords=[], followAudio=true, lastWord=-1;
-  let rsvpIndex=0, rsvpTimer=null, rsvpRunning=false;
   const roman={1:'I',2:'II',3:'III',4:'IV'};
   const fmt=t => { if (!Number.isFinite(t)||t<0) return '0:00'; const s=Math.floor(t); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
   function setStatus(message, kind='') { $('status').textContent=message; $('status').className='status '+kind; }
@@ -161,7 +149,8 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     }
   }
   function updateCurrentWord() {
-    if(!followAudio || !wordRecords.length) return;
+    const rsvpActive=textFullscreen && fullscreenMode==='rsvp';
+    if((!followAudio && !rsvpActive) || !wordRecords.length) return;
     const t=audio.currentTime;
     let lo=0,hi=wordRecords.length-1,found=-1;
     while(lo<=hi){const mid=(lo+hi)>>1; if(wordRecords[mid].start<=t){found=mid;lo=mid+1;}else hi=mid-1;}
@@ -169,6 +158,8 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     if(found===lastWord)return;
     if(lastWord>=0)wordRecords[lastWord].el.classList.remove('current');
     wordRecords[found].el.classList.add('current');
+    // RSVP is synchronized to the audiobook's actual word timestamps; it has no independent timer.
+    if(textFullscreen && fullscreenMode==='rsvp') $('rsvpWord').textContent=wordRecords[found].el.textContent;
     if(followAudio && !(textFullscreen && fullscreenMode==='rsvp')) {
       const el=wordRecords[found].el, box=$('reader');
       if(textFullscreen) {
@@ -188,8 +179,6 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     $('textFullscreen').appendChild(reader);
     $('textFullscreen').classList.add('open');
     document.body.classList.add('text-open');
-    $('fullTextTitle').textContent=`Part ${roman[chapters[current].part]} · Chapter ${String(chapters[current].ch).padStart(2,'0')}`;
-    $('fullTextNote').textContent=$('readerNote').textContent;
     $('fullTextBtn').textContent='⤢ Exit full-screen';
     textFullscreen=true;
     setFullscreenMode('guided');
@@ -205,7 +194,6 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   }
   function closeFullText() {
     if(!textFullscreen) return;
-    stopRsvp();
     if(readerAnchor) readerHome.insertBefore(reader,readerAnchor); else readerHome.appendChild(reader);
     $('textFullscreen').classList.remove('open');
     document.body.classList.remove('text-open');
@@ -213,57 +201,26 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     textFullscreen=false;
     $('fullTextBtn').focus();
   }
-  function stopRsvp() {
-    rsvpRunning=false;
-    if(rsvpTimer!==null) clearTimeout(rsvpTimer);
-    rsvpTimer=null;
-    $('rsvpPlayBtn').textContent='▶ Start RSVP';
-  }
-  function showRsvpWord() {
-    if(!wordRecords.length) { $('rsvpWord').textContent='Text timings are not loaded yet'; $('rsvpProgress').textContent=''; return; }
-    if(rsvpIndex>=wordRecords.length) {
-      rsvpIndex=wordRecords.length-1;
-      $('rsvpWord').textContent=wordRecords[rsvpIndex].el.textContent;
-      $('rsvpProgress').textContent=`Finished · ${wordRecords.length.toLocaleString()} words`;
-      stopRsvp(); return;
-    }
-    $('rsvpWord').textContent=wordRecords[rsvpIndex].el.textContent;
-    $('rsvpProgress').textContent=`${(rsvpIndex+1).toLocaleString()} / ${wordRecords.length.toLocaleString()} words · ${$('rsvpWpm').value} WPM`;
-  }
-  function scheduleRsvp() {
-    if(!rsvpRunning) return;
-    if(rsvpTimer!==null) clearTimeout(rsvpTimer);
-    rsvpTimer=setTimeout(()=>{
-      rsvpIndex++;
-      if(rsvpIndex>=wordRecords.length) { showRsvpWord(); return; }
-      showRsvpWord(); scheduleRsvp();
-    },60000/Number($('rsvpWpm').value||500));
-  }
   function setFullscreenMode(mode) {
     fullscreenMode=mode;
     const rsvp=mode==='rsvp';
     $('reader').hidden=rsvp;
     $('rsvpView').hidden=!rsvp;
-    $('rsvpControls').hidden=!rsvp;
     $('guidedModeBtn').classList.toggle('active',!rsvp);
     $('rsvpModeBtn').classList.toggle('active',rsvp);
+    $('guidedModeBtn').setAttribute('aria-pressed',String(!rsvp));
+    $('rsvpModeBtn').setAttribute('aria-pressed',String(rsvp));
     if(rsvp) {
-      audio.pause();
-      if(rsvpIndex===0 && lastWord>0) rsvpIndex=lastWord;
-      showRsvpWord();
-    } else stopRsvp();
-    if(!rsvp && followAudio) updateCurrentWord();
+      if(lastWord<0 && wordRecords.length) {
+        let i=0; while(i+1<wordRecords.length && wordRecords[i+1].start<=audio.currentTime) i++;
+        lastWord=i; wordRecords[i].el.classList.add('current');
+      }
+      $('rsvpWord').textContent=lastWord>=0 && wordRecords[lastWord] ? wordRecords[lastWord].el.textContent : '';
+      // If audio is already playing, the next timed word updates RSVP automatically.
+    } else if(followAudio) updateCurrentWord();
   }
   $('guidedModeBtn').addEventListener('click',()=>setFullscreenMode('guided'));
   $('rsvpModeBtn').addEventListener('click',()=>setFullscreenMode('rsvp'));
-  $('rsvpPlayBtn').addEventListener('click',()=>{
-    if(rsvpRunning) { stopRsvp(); return; }
-    if(!wordRecords.length) return;
-    if(rsvpIndex>=wordRecords.length) rsvpIndex=0;
-    rsvpRunning=true; $('rsvpPlayBtn').textContent='Ⅱ Pause RSVP'; showRsvpWord(); scheduleRsvp();
-  });
-  $('rsvpRestartBtn').addEventListener('click',()=>{stopRsvp();rsvpIndex=0;showRsvpWord();});
-  $('rsvpWpm').addEventListener('change',()=>{showRsvpWord();if(rsvpRunning)scheduleRsvp();});
   $('fullTextBtn').addEventListener('click',()=>textFullscreen?closeFullText():openFullText());
   $('closeFullTextBtn').addEventListener('click',closeFullText);
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&textFullscreen){e.preventDefault();closeFullText();}});
@@ -279,9 +236,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     $('partLabel').textContent=`PART ${roman[c.part]}`;
     $('chapterTitle').textContent=`Chapter ${String(c.ch).padStart(2,'0')}`;
     $('fileLabel').textContent=c.file;
-    $('fullTextTitle').textContent=`Part ${roman[c.part]} · Chapter ${String(c.ch).padStart(2,'0')}`;
     audio.src=c.src; audio.load();
-    stopRsvp(); rsvpIndex=0;
     loadReader(c);
     $('playBtn').textContent='▶ Play';
     renderList();
@@ -298,8 +253,6 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   audio.addEventListener('pause',()=>{$('playBtn').textContent='▶ Play';});
   audio.addEventListener('timeupdate',()=>{$('timeCurrent').textContent=fmt(audio.currentTime);$('timeDuration').textContent=fmt(audio.duration);updateCurrentWord();});
   audio.addEventListener('seeked',updateCurrentWord);
-  const readerNoteObserver=new MutationObserver(()=>{$('fullTextNote').textContent=$('readerNote').textContent;});
-  readerNoteObserver.observe($('readerNote'),{childList:true,characterData:true,subtree:true});
   audio.addEventListener('loadedmetadata',()=>{chapters[current].available=true;setStatus('Audio loaded and ready.','good');renderList();$('timeDuration').textContent=fmt(audio.duration);});
   audio.addEventListener('error',()=>{chapters[current].available=false;setStatus('Could not load this MP3. Make sure the filename and build/audio_in/merged_chapters/ path are correct.','warn');renderList();});
   audio.addEventListener('ended',()=>{if(current<chapters.length-1)load(current+1,true);});
