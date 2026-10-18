@@ -17,6 +17,14 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
 .list-head{padding:16px;border-bottom:1px solid var(--line)}.list-head h2{font-size:16px;margin:0 0 10px}.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);outline:none}.search:focus{border-color:var(--accent)}
 .filters{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.filter{padding:5px 9px;font-size:12px;border-radius:999px}.filter.active{background:var(--soft);border-color:var(--accent)}
 .chapters{max-height:calc(100vh - 250px);min-height:300px;overflow:auto}.chapter{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;text-align:left;padding:12px 15px;display:flex;gap:10px;align-items:center;background:transparent}.chapter:hover{background:var(--bg)}.chapter.active{background:var(--soft)}.number{width:29px;height:29px;flex:0 0 29px;border-radius:8px;background:var(--bg);display:grid;place-items:center;font-size:11px;color:var(--muted);font-weight:700}.chapter.active .number{background:var(--accent);color:white}.chapter-info{min-width:0;flex:1}.chapter-name{font-weight:600}.chapter-file{font-size:11px;color:var(--muted);overflow-wrap:anywhere}.dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:0 0 8px}.dot.yes{background:var(--good)}.empty{padding:22px;color:var(--muted);text-align:center}
+
+.reader-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+.reader-note{font-size:12px;color:var(--muted);margin-top:3px}
+.reader{margin-top:14px;max-height:55vh;overflow:auto;padding:18px;background:var(--bg);border:1px solid var(--line);border-radius:12px;font-family:Georgia,"Times New Roman",serif;font-size:19px;line-height:2.05;white-space:normal}
+.word{border-radius:4px;padding:1px 0;transition:background .08s,color .08s}
+.word.current{background:#ffe082;color:#211a00;box-shadow:0 0 0 2px #ffe082}
+[data-theme="dark"] .word.current{background:#f5c451;color:#211a00;box-shadow:0 0 0 2px #f5c451}
+.word-space{white-space:pre-wrap}
 .footer{max-width:1100px;padding:0 18px;margin:0 auto 28px;color:var(--muted);font-size:12px}.keys{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}kbd{font:11px ui-monospace,monospace;padding:3px 6px;border:1px solid var(--line);border-radius:5px;background:var(--bg)}
 @media(max-width:760px){.layout{grid-template-columns:1fr;margin:16px auto}.chapters{max-height:48vh;min-height:220px}header{padding:12px 16px}.now{padding:19px}}
 </style>
@@ -42,6 +50,8 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
       <div class="progressline"><span id="timeCurrent">0:00</span><span id="timeDuration">0:00</span></div>
       <div class="status" id="status">Checking which audio files are available…</div>
       <div class="keys"><span><kbd>Space</kbd> Play/pause</span><span><kbd>←</kbd> Previous</span><span><kbd>→</kbd> Next</span></div>
+      <div class="reader-head"><div><div class="eyebrow">Read along</div><div class="reader-note" id="readerNote">Preparing chapter text…</div></div><button id="followBtn" type="button" class="filter active">Follow audio: on</button></div>
+      <div id="reader" class="reader" aria-live="off">Chapter text and word timing files will appear here after you run <code>prepare_readalong.py</code>.</div>
     </div>
   </section>
   <aside class="panel">
@@ -59,7 +69,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     <div id="chapters" class="chapters"></div>
   </aside>
 </main>
-<div class="footer">Host this page as <code>index.html</code> on GitHub Pages. Audio files are loaded from <code>build/merged_chapters/</code> using relative paths.</div>
+<div class="footer">Host this page as <code>index.html</code> on GitHub Pages. Audio files load from <code>build/audio_in/merged_chapters/</code>; synchronized word data loads from <code>readalong/</code>.</div>
 <script>
 (() => {
   const chapters = [];
@@ -68,12 +78,12 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     for (let ch=1; ch<=counts[part]; ch++) {
       const p = String(part).padStart(2,'0');
       const c = String(ch).padStart(2,'0');
-      chapters.push({part, ch, file:`Part_${['','I','II','III','IV'][part]}_Chapter_${c}.mp3`, src:`./build/merged_chapters/Part_${['','I','II','III','IV'][part]}_Chapter_${c}.mp3`, available:null});
+      chapters.push({part, ch, file:`Part_${['','I','II','III','IV'][part]}_Chapter_${c}.mp3`, src:`./build/audio_in/merged_chapters/Part_${['','I','II','III','IV'][part]}_Chapter_${c}.mp3`, available:null});
     }
   }
   const $ = id => document.getElementById(id);
   const audio=$('audio'), list=$('chapters');
-  let current=0, filterPart='all';
+  let current=0, filterPart='all', wordRecords=[], followAudio=true, lastWord=-1;
   const roman={1:'I',2:'II',3:'III',4:'IV'};
   const fmt=t => { if (!Number.isFinite(t)||t<0) return '0:00'; const s=Math.floor(t); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
   function setStatus(message, kind='') { $('status').textContent=message; $('status').className='status '+kind; }
@@ -92,6 +102,58 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
       b.addEventListener('click',()=>load(c.i,true)); list.appendChild(b);
     }
   }
+  function normalizeWord(s) {
+    return (s||'').toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9']/g,'');
+  }
+  async function loadReader(c) {
+    const reader=$('reader');
+    reader.innerHTML='';
+    wordRecords=[]; lastWord=-1;
+    $('readerNote').textContent='Loading chapter text and word timings…';
+    try {
+      const res=await fetch(`./readalong/${c.file.replace(/\.mp3$/i,'.json')}`,{cache:'no-store'});
+      if(!res.ok) throw new Error('timing file not found');
+      const data=await res.json();
+      const words=Array.isArray(data.words)?data.words:[];
+      if(!words.length) throw new Error('no words');
+      const frag=document.createDocumentFragment();
+      words.forEach((w,i)=>{
+        const span=document.createElement('span');
+        span.className='word';
+        span.textContent=w.text;
+        span.dataset.i=String(i);
+        frag.appendChild(span);
+        if(w.spaceAfter) { const space=document.createElement('span'); space.className='word-space'; space.textContent=w.spaceAfter; frag.appendChild(space); }
+        wordRecords.push({start:Number(w.start)||0,end:Number(w.end)||0,el:span});
+      });
+      reader.appendChild(frag);
+      $('readerNote').textContent=`${words.length.toLocaleString()} words · word timing loaded`;
+    } catch(e) {
+      $('readerNote').textContent='Word timings not generated yet';
+      reader.textContent='Run prepare_readalong.py on your Mac to download the Gutenberg text, match it to each MP3, and generate word timings. Then commit the readalong/ folder to GitHub.';
+    }
+  }
+  function updateCurrentWord() {
+    if(!followAudio || !wordRecords.length) return;
+    const t=audio.currentTime;
+    let lo=0,hi=wordRecords.length-1,found=-1;
+    while(lo<=hi){const mid=(lo+hi)>>1; if(wordRecords[mid].start<=t){found=mid;lo=mid+1;}else hi=mid-1;}
+    if(found<0 || (wordRecords[found].end>0 && t>wordRecords[found].end+0.25)) return;
+    if(found===lastWord)return;
+    if(lastWord>=0)wordRecords[lastWord].el.classList.remove('current');
+    wordRecords[found].el.classList.add('current');
+    if(followAudio) {
+      const el=wordRecords[found].el, box=$('reader'), top=el.offsetTop-box.offsetTop;
+      if(top<box.scrollTop+20 || top>box.scrollTop+box.clientHeight-35) el.scrollIntoView({block:'center',behavior:'auto'});
+    }
+    lastWord=found;
+  }
+  $('followBtn').addEventListener('click',()=>{
+    followAudio=!followAudio;
+    $('followBtn').textContent=`Follow audio: ${followAudio?'on':'off'}`;
+    $('followBtn').classList.toggle('active',followAudio);
+    if(followAudio) updateCurrentWord();
+  });
   function load(index, autoplay=false) {
     current=Math.max(0,Math.min(chapters.length-1,index));
     const c=chapters[current];
@@ -99,9 +161,10 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     $('chapterTitle').textContent=`Chapter ${String(c.ch).padStart(2,'0')}`;
     $('fileLabel').textContent=c.file;
     audio.src=c.src; audio.load();
+    loadReader(c);
     $('playBtn').textContent='▶ Play';
     renderList();
-    setStatus(c.available===false?'Audio file not found. Check that it exists in build/merged_chapters/.':c.available===true?'Ready to play.':'Trying to load audio…',c.available===false?'warn':'');
+    setStatus(c.available===false?'Audio file not found. Check that it exists in build/audio_in/merged_chapters/.':c.available===true?'Ready to play.':'Trying to load audio…',c.available===false?'warn':'');
     if(autoplay) audio.play().catch(()=>setStatus('Could not start playback. Check that the MP3 exists in audio_in/.','warn'));
   }
   $('prevBtn').addEventListener('click',()=>load(current-1,true));
@@ -110,9 +173,9 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   $('restartBtn').addEventListener('click',()=>{audio.currentTime=0;audio.play().catch(()=>{});});
   audio.addEventListener('play',()=>{$('playBtn').textContent='Ⅱ Pause';});
   audio.addEventListener('pause',()=>{$('playBtn').textContent='▶ Play';});
-  audio.addEventListener('timeupdate',()=>{$('timeCurrent').textContent=fmt(audio.currentTime);$('timeDuration').textContent=fmt(audio.duration);});
+  audio.addEventListener('timeupdate',()=>{$('timeCurrent').textContent=fmt(audio.currentTime);$('timeDuration').textContent=fmt(audio.duration);updateCurrentWord();});
   audio.addEventListener('loadedmetadata',()=>{chapters[current].available=true;setStatus('Audio loaded and ready.','good');renderList();$('timeDuration').textContent=fmt(audio.duration);});
-  audio.addEventListener('error',()=>{chapters[current].available=false;setStatus('Could not load this MP3. Make sure the filename and audio_in/ path are correct.','warn');renderList();});
+  audio.addEventListener('error',()=>{chapters[current].available=false;setStatus('Could not load this MP3. Make sure the filename and build/audio_in/merged_chapters/ path are correct.','warn');renderList();});
   audio.addEventListener('ended',()=>{if(current<chapters.length-1)load(current+1,true);});
   $('search').addEventListener('input',renderList);
   $('filters').addEventListener('click',e=>{const b=e.target.closest('button[data-part]');if(!b)return;filterPart=b.dataset.part;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));renderList();});
@@ -127,7 +190,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   });
   renderList(); load(0);
   // Probe each file quietly so the chapter list can show which files exist.
-  Promise.all(chapters.map(async c=>{try{const r=await fetch(c.src,{method:'HEAD',cache:'no-store'});c.available=r.ok&&r.headers.get('content-type')!=='text/html';}catch(e){c.available=false;}})).then(()=>{renderList();if(chapters[current].available===false)setStatus('No MP3 detected for this chapter yet. Check build/merged_chapters/ and refresh.','warn');});
+  Promise.all(chapters.map(async c=>{try{const r=await fetch(c.src,{method:'HEAD',cache:'no-store'});c.available=r.ok&&r.headers.get('content-type')!=='text/html';}catch(e){c.available=false;}})).then(()=>{renderList();if(chapters[current].available===false)setStatus('No MP3 detected for this chapter yet. Check build/audio_in/merged_chapters/ and refresh.','warn');});
 })();
 </script>
 </body>
