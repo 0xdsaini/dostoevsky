@@ -104,6 +104,32 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   let current=0, filterPart='all', wordRecords=[], followAudio=true, lastWord=-1;
   let rsvpIndex=-1, rsvpTimer=null, fullscreenRequested=false;
   const playbackRates=[0.5,0.75,1,1.25,1.5,1.75,2,2.5,3];
+  // RSVP can omit common function words; the full synchronized text still contains every word.
+  const rsvpFunctionWords = new Set((
+    "a an the this that these those some any each every either neither much many more most few less least " +
+    "of at by for from in into on onto to with within without about above across after against along among around " +
+    "before behind below beneath beside between beyond during except inside near off out outside over per through " +
+    "toward under underneath until up upon via as and but or nor so yet if unless while although though because " +
+    "since than whether who whom whose which what where when why how I me my mine we us our ours you your yours " +
+    "he him his she her hers it its they them their theirs am is are was were be been being do does did have has had " +
+    "can could may might must shall should will would just very also only even still already again not no yes"
+  ).toLowerCase().split(/\s+/));
+  function isRsvpFunctionWord(index) {
+    const raw = wordRecords[index]?.el?.textContent || '';
+    const normalized = raw.toLowerCase().replace(/[’‘]/g, "'").replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, '');
+    return !normalized || rsvpFunctionWords.has(normalized);
+  }
+  function nextRsvpContentIndex(afterIndex) {
+    for (let i = afterIndex + 1; i < wordRecords.length; i++) if (!isRsvpFunctionWord(i)) return i;
+    return -1;
+  }
+  function contentWordAtTime(time) {
+    let i = findWordAtTime(time);
+    while (i >= 0 && isRsvpFunctionWord(i)) i--;
+    if (i >= 0) return i;
+    for (let j = 0; j < wordRecords.length; j++) if (!isRsvpFunctionWord(j)) return j;
+    return Math.max(0, findWordAtTime(time));
+  }
   const roman={1:'I',2:'II',3:'III',4:'IV'};
   const fmt=t => { if (!Number.isFinite(t)||t<0) return '0:00'; const s=Math.floor(t); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
   function setStatus(message, kind='') { $('status').textContent=message; $('status').className='status '+kind; }
@@ -200,23 +226,25 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   }
   function syncRsvpToAudio() {
     if(!wordRecords.length) return;
-    rsvpIndex=findWordAtTime(audio.currentTime);
+    // Hold the last meaningful word while function words are spoken.
+    rsvpIndex=contentWordAtTime(audio.currentTime);
     setCurrentIndex(rsvpIndex,true);
   }
   function scheduleNextRsvpWord() {
     stopRsvpScheduler();
     if(!textFullscreen || fullscreenMode!=='rsvp' || audio.paused || !wordRecords.length) return;
     if(rsvpIndex<0) syncRsvpToAudio();
-    if(rsvpIndex>=wordRecords.length-1) return;
-    const nextIndex=rsvpIndex+1;
+    const nextIndex=nextRsvpContentIndex(rsvpIndex);
+    if(nextIndex<0) return;
     const currentTime=audio.currentTime;
     const nextStart=Math.max(0,Number(wordRecords[nextIndex].start)||0);
     const delta=nextStart-currentTime;
-    // Normal words follow their timestamps. If several source words share a timestamp
-    // (often due to imperfect alignment), show each in order with a short visible beat.
+    // Skip function words visually, but time each displayed word against the narration.
     const delay=delta>0.025 ? (delta/audio.playbackRate)*1000 : 65;
     rsvpTimer=setTimeout(()=>{
       if(!textFullscreen || fullscreenMode!=='rsvp' || audio.paused) { rsvpTimer=null; return; }
+      // If playback was scrubbed backwards while waiting, recalculate against the new position.
+      if(audio.currentTime + 0.35 < nextStart) { scheduleNextRsvpWord(); return; }
       rsvpIndex=nextIndex;
       setCurrentIndex(rsvpIndex,true);
       scheduleNextRsvpWord();
