@@ -1,0 +1,474 @@
+
+#!/usr/bin/env python3
+"""Offline audiobook verification. Never modifies audio files."""
+
+import csv
+import json
+import math
+import re
+import sys
+import subprocess
+from collections import Counter, defaultdict
+from pathlib import Path
+
+import av
+from rapidfuzz import fuzz
+from vosk import Model, KaldiRecognizer
+
+
+ROOT = Path(__file__).resolve().parent
+MANIFEST = ROOT / "manifest.csv"
+AUDIO_DIR = ROOT / "audio_in"
+MODEL_DIR = ROOT / "models" / "vosk-model-small-en-us-0.15"
+REPORT_DIR = ROOT / "verification"
+CACHE_FILE = REPORT_DIR / "transcripts.json"
+
+# Tune these after inspecting the first report.
+MIN_MATCH_SCORE = 70
+MIN_MARGIN = 2
+CANDIDATE_COUNT = 25
+SAMPLE_RATE = 16000
+CHECK_SECONDS = 10
+
+
+def relative(path):
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def normalize(text):
+    text = text.lower().replace("’", "'")
+    return re.sub(r"[^a-z0-9']+", " ", text).strip()
+
+
+def tokens(text):
+    return set(normalize(text).split())
+
+
+def read_manifest():
+    if not MANIFEST.exists():
+        sys.exit(f"Missing manifest: {MANIFEST}")
+
+    with MANIFEST.open(newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+
+    if not rows:
+        sys.exit("manifest.csv has no rows.")
+
+    for row in rows:
+        row["text_path"] = ROOT / row["text_file"]
+        row["expected_audio"] = Path(row["audio_file"]).name
+
+        if not row["text_path"].is_file():
+            sys.exit(f"Missing expected text: {row['text_path']}")
+
+        row["expected_text"] = row["text_path"].read_text(
+            encoding="utf-8"
+        )
+
+    return rows
+
+
+def load_cache():
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+
+    if CACHE_FILE.exists():
+        try:
+            return json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            print("Transcript cache unreadable; rebuilding it.")
+    return {}
+
+
+def save_cache(cache):
+    CACHE_FILE.write_text(
+        json.dumps(cache, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+
+
+
+def transcribe(path, model, cache):
+    """Transcribe only the first 10 seconds using local Vosk."""
+    key = relative(path)
+    stat = path.stat()
+    cache_key = f"{key}:first10s"
+
+    old = cache.get(cache_key)
+    if (
+        old
+        and old.get("size") == stat.st_size
+        and old.get("mtime_ns") == stat.st_mtime_ns
+        and old.get("transcript")
+    ):
+        print(f"  Cached: {path.name}")
+        return old["transcript"]
+
+    print(f"  Checking first {CHECK_SECONDS}s: {path.name}")
+
+    recognizer = KaldiRecognizer(model, SAMPLE_RATE)
+    recognizer.SetWords(False)
+
+    with av.open(str(path)) as container:
+        stream = next(
+            (s for s in container.streams if s.type == "audio"),
+            None
+        )
+        if stream is None:
+            raise RuntimeError("No audio stream found.")
+
+        resampler = av.AudioResampler(
+            format="s16",
+            layout="mono",
+            rate=SAMPLE_RATE
+        )
+
+        audio_samples = 0
+
+        for frame in container.decode(stream):
+            frames = resampler.resample(frame)
+            if frames is None:
+                continue
+            if not isinstance(frames, (list, tuple)):
+                frames = [frames]
+
+            for converted in frames:
+                if converted is None:
+                    continue
+
+                remaining = int(
+                    CHECK_SECONDS * SAMPLE_RATE - audio_samples
+                )
+                if remaining <= 0:
+                    break
+
+                data = converted.to_ndarray().tobytes()
+                usable_bytes = min(len(data), remaining * 2)
+                usable_bytes -= usable_bytes % 2
+                data = data[:usable_bytes]
+
+                if data:
+                    recognizer.AcceptWaveform(data)
+                    audio_samples += len(data) // 2
+
+            if audio_samples >= CHECK_SECONDS * SAMPLE_RATE:
+                break
+
+    transcript = json.loads(recognizer.FinalResult()).get(
+        "text", ""
+    ).strip()
+
+    cache[cache_key] = {
+        "size": stat.st_size,
+        "mtime_ns": stat.st_mtime_ns,
+        "transcript": transcript
+    }
+    save_cache(cache)
+    return transcript
+
+
+
+def build_index(rows):
+    """Build a local word index to narrow candidate text chunks."""
+    document_words = [tokens(row["expected_text"]) for row in rows]
+    df = Counter()
+
+    for words in document_words:
+        df.update(words)
+
+    count = len(rows)
+    idf = {
+        word: math.log((count + 1) / (freq + 1)) + 1
+        for word, freq in df.items()
+    }
+
+    postings = defaultdict(list)
+    for index, words in enumerate(document_words):
+        for word in words:
+            postings[word].append(index)
+
+    return document_words, idf, postings
+
+
+
+def rank_matches(transcript, rows, document_words, idf, postings):
+    """Match a short audio opening against each chunk's opening."""
+    heard_text = normalize(transcript)
+    heard_words = set(heard_text.split())
+
+    if len(heard_words) < 3:
+        return []
+
+    ranked = []
+
+    for index, row in enumerate(rows):
+        expected_text = normalize(row["expected_text"])
+
+        # Audio starts at the beginning of its corresponding text chunk.
+        # Ignore the rest of the long chapter chunk.
+        expected_prefix = expected_text[:1200]
+        expected_words = set(expected_prefix.split())
+
+        if not expected_words:
+            continue
+
+        # Compare the short transcript against the expected opening.
+        sequence_score = fuzz.partial_ratio(
+            heard_text, expected_prefix
+        )
+
+        # What proportion of recognized words occur in the opening?
+        overlap = heard_words & expected_words
+        word_score = 100 * len(overlap) / len(heard_words)
+
+        score = 0.70 * sequence_score + 0.30 * word_score
+
+        ranked.append({
+            "index": index,
+            "score": round(score, 2),
+            "sequence_score": round(sequence_score, 2),
+            "coverage": round(word_score, 2)
+        })
+
+    return sorted(
+        ranked,
+        key=lambda item: item["score"],
+        reverse=True
+    )
+
+
+
+def write_csv(path, rows, fields):
+    with path.open("w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def main():
+    if not MODEL_DIR.is_dir():
+        sys.exit(
+            f"Local Vosk model not found:\n{MODEL_DIR}\n"
+            "Download and extract the model into models/ first."
+        )
+
+    if not AUDIO_DIR.is_dir():
+        sys.exit(f"Audio directory not found: {AUDIO_DIR}")
+
+    expected = read_manifest()
+    audio_files = sorted(
+        p for p in AUDIO_DIR.rglob("*")
+        if p.is_file() and p.suffix.lower() == ".mp3"
+    )
+
+    if not audio_files:
+        sys.exit(f"No MP3 files found under {AUDIO_DIR}")
+
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    cache = load_cache()
+
+    print("Loading local speech model...")
+    model = Model(str(MODEL_DIR))
+
+    print(f"Expected chunks: {len(expected)}")
+    print(f"MP3 files found: {len(audio_files)}")
+    print("No audio or transcript is sent to a remote service.\n")
+
+    transcripts = {}
+    failures = []
+
+    for number, path in enumerate(audio_files, start=1):
+        print(f"[{number}/{len(audio_files)}] {path.name}")
+        try:
+            transcripts[path] = transcribe(path, model, cache)
+        except Exception as error:
+            failures.append({
+                "audio_file": relative(path),
+                "error": str(error)
+            })
+            print(f"  ERROR: {error}")
+
+    save_cache(cache)
+
+    document_words, idf, postings = build_index(expected)
+    results = []
+
+    for path, transcript in transcripts.items():
+        ranked = rank_matches(
+            transcript, expected, document_words, idf, postings
+        )
+
+        best = ranked[0] if ranked else None
+        second = ranked[1] if len(ranked) > 1 else None
+
+        if best:
+            row = expected[best["index"]]
+            margin = (
+                best["score"] - second["score"]
+                if second else best["score"]
+            )
+
+            results.append({
+                "audio_path": path,
+                "audio_file": relative(path),
+                "matched_chunk": row["text_file"],
+                "expected_audio_filename": row["expected_audio"],
+                "score": best["score"],
+                "second_score": second["score"] if second else "",
+                "margin": round(margin, 2),
+                "sequence_score": best["sequence_score"],
+                "word_coverage": best["coverage"],
+                "transcript": transcript,
+                "status": "PENDING"
+            })
+        else:
+            results.append({
+                "audio_path": path,
+                "audio_file": relative(path),
+                "matched_chunk": "",
+                "expected_audio_filename": "",
+                "score": 0,
+                "second_score": "",
+                "margin": 0,
+                "sequence_score": 0,
+                "word_coverage": 0,
+                "transcript": transcript,
+                "status": "LOW_CONFIDENCE"
+            })
+
+    # Assign at most one audio file to each expected text chunk.
+    # Higher-scoring recordings win when several files match one chunk.
+    claimed = set()
+
+    confident = sorted(
+        (r for r in results if r["score"] >= MIN_MATCH_SCORE),
+        key=lambda r: r["score"],
+        reverse=True
+    )
+
+    for result in confident:
+        if not result["matched_chunk"]:
+            continue
+
+        target = result["matched_chunk"]
+
+        if target in claimed:
+            result["status"] = "POSSIBLE_DUPLICATE"
+            continue
+
+        claimed.add(target)
+
+        if result["margin"] < MIN_MARGIN:
+            result["status"] = "UNCERTAIN_MATCH"
+        elif (
+            Path(result["audio_file"]).name
+            == result["expected_audio_filename"]
+        ):
+            result["status"] = "OK"
+        else:
+            result["status"] = "MATCHED_BUT_MISNAMED"
+
+    for result in results:
+        if result["status"] != "PENDING":
+            continue
+
+        if result["score"] < MIN_MATCH_SCORE:
+            result["status"] = "LOW_CONFIDENCE"
+        elif result["margin"] < MIN_MARGIN:
+            result["status"] = "UNCERTAIN_MATCH"
+
+    missing = []
+
+    for row in expected:
+        matching = [
+            r for r in results
+            if r["matched_chunk"] == row["text_file"]
+            and r["status"] in ("OK", "MATCHED_BUT_MISNAMED")
+        ]
+
+        if not matching:
+            missing.append({
+                "expected_audio_filename": row["expected_audio"],
+                "expected_text_file": row["text_file"],
+                "part": row["part"],
+                "chapter": row["chapter"],
+                "chunk": row["chunk"],
+                "status": "MISSING_OR_UNVERIFIED"
+            })
+
+    report_rows = []
+    for result in results:
+        report_rows.append({
+            key: value for key, value in result.items()
+            if key != "audio_path"
+        })
+
+    write_csv(
+        REPORT_DIR / "audio_verification.csv",
+        report_rows,
+        [
+            "audio_file", "matched_chunk", "expected_audio_filename",
+            "score", "second_score", "margin", "sequence_score",
+            "word_coverage", "status", "transcript"
+        ]
+    )
+
+    write_csv(
+        REPORT_DIR / "missing_chunks.csv",
+        missing,
+        [
+            "expected_audio_filename", "expected_text_file",
+            "part", "chapter", "chunk", "status"
+        ]
+    )
+
+    write_csv(
+        REPORT_DIR / "transcription_errors.csv",
+        failures,
+        ["audio_file", "error"]
+    )
+
+    counts = Counter(r["status"] for r in results)
+
+    print("\n========== VERIFICATION SUMMARY ==========")
+    for status, count in sorted(counts.items()):
+        print(f"{status:24} {count}")
+
+    print(f"\nExpected text chunks: {len(expected)}")
+    print(f"MP3 files found:      {len(audio_files)}")
+    print(f"Missing/unverified:   {len(missing)}")
+    print(f"Transcription errors: {len(failures)}")
+    print("\nReports saved locally in:")
+    print(REPORT_DIR)
+    print("\nReview uncertain matches before treating the book as complete.")
+
+        # Automatically open the interactive reviewer for non-OK items.
+    non_ok = [
+        row for row in results
+        if row["status"] != "OK"
+    ]
+
+    if non_ok:
+        review_script = ROOT / "rename_review.py"
+
+        if review_script.is_file():
+            print(
+                f"\nFound {len(non_ok)} non-OK audio files. "
+                "Opening interactive review..."
+            )
+
+            subprocess.run(
+                [sys.executable, str(review_script)],
+                cwd=str(ROOT),
+                check=False
+            )
+        else:
+            print(
+                f"\nReview script not found: {review_script}"
+            )
+
+
+if __name__ == "__main__":
+    main()
