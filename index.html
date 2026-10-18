@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Audiobook — Chapter Player</title>
+<title>The Idiot · Audiobook</title>
 <style>
 :root{color-scheme:light;--bg:#f5f6f8;--panel:#fff;--text:#20242b;--muted:#687080;--line:#e1e5eb;--accent:#5b63e6;--soft:#eef0ff;--good:#16835d;--bad:#b45309;--shadow:0 8px 28px #1d27350b}
 [data-theme="dark"]{color-scheme:dark;--bg:#101216;--panel:#191d24;--text:#edf0f5;--muted:#a0a8b6;--line:#303743;--accent:#9ca3ff;--soft:#292d49;--good:#62d6a5;--bad:#fbbf72;--shadow:0 8px 28px #0003}
@@ -30,12 +30,34 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
 .word-space{white-space:pre-wrap}
 .footer{max-width:1100px;padding:0 18px;margin:0 auto 28px;color:var(--muted);font-size:12px}.keys{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}kbd{font:11px ui-monospace,monospace;padding:3px 6px;border:1px solid var(--line);border-radius:5px;background:var(--bg)}
 @media(max-width:760px){.layout{grid-template-columns:1fr;margin:16px auto}.chapters{max-height:48vh;min-height:220px}header{padding:12px 16px}.now{padding:19px}}
+
+/* Apple-inspired refinement: calm surfaces, restrained color, compact icon controls */
+:root{--bg:#f5f5f7;--panel:rgba(255,255,255,.88);--text:#1d1d1f;--muted:#86868b;--line:rgba(29,29,31,.10);--accent:#0071e3;--soft:rgba(0,113,227,.10);--good:#248a5a;--bad:#b45309;--shadow:0 12px 40px rgba(0,0,0,.055)}
+[data-theme="dark"]{--bg:#000;--panel:rgba(28,28,30,.92);--text:#f5f5f7;--muted:#98989d;--line:rgba(255,255,255,.12);--accent:#0a84ff;--soft:rgba(10,132,255,.18);--good:#30d158;--bad:#ffb340;--shadow:0 12px 40px rgba(0,0,0,.25)}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif;letter-spacing:-.015em;-webkit-font-smoothing:antialiased}
+header{backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);background:color-mix(in srgb,var(--bg) 82%,transparent);border-bottom-color:var(--line);padding-top:13px;padding-bottom:13px}
+.brand{font-size:17px;letter-spacing:-.45px;font-weight:700}.sub{letter-spacing:0}
+.layout{gap:18px;margin-top:24px;margin-bottom:24px}.panel{border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.now{padding:clamp(20px,3vw,32px)}.chapter-title{font-size:clamp(28px,4vw,40px);letter-spacing:-1.2px;font-weight:700}.eyebrow{letter-spacing:.09em;font-size:11px}
+button{border:1px solid var(--line);border-radius:999px;padding:9px 13px;min-height:38px;background:color-mix(in srgb,var(--panel) 94%,var(--bg));box-shadow:0 1px 1px rgba(0,0,0,.025);transition:background .16s,border-color .16s,transform .16s,color .16s}
+button:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:var(--soft)}button:active{transform:scale(.97)}button:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 42%,transparent);outline-offset:2px}
+.primary{background:var(--accent);border-color:var(--accent);color:#fff}.primary:hover{background:color-mix(in srgb,var(--accent) 86%,#000);color:#fff}
+.controls{gap:8px}.controls button{min-width:40px;padding:8px 11px}.controls .seek-btn{min-width:50px;font-variant-numeric:tabular-nums}.controls label{margin-left:8px}.speed-select{border-radius:999px;padding:8px 12px;background:var(--panel)}
+audio{margin:20px 0 12px} .status{border-radius:14px;background:color-mix(in srgb,var(--bg) 70%,var(--panel));margin-top:16px}
+.reader-head{margin-top:24px;padding-top:18px}.reader{border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--bg) 82%,var(--panel));font-size:20px;line-height:2.05;padding:22px}
+.word.current{background:#ffd60a;color:#1d1d1f;box-shadow:0 0 0 2px #ffd60a}[data-theme="dark"] .word.current{background:#ffd60a;color:#1d1d1f;box-shadow:0 0 0 2px #ffd60a}
+.list-head{padding:20px;border-bottom-color:var(--line)}.list-head h2{font-size:16px;letter-spacing:-.3px}.search{border-radius:12px;background:color-mix(in srgb,var(--bg) 80%,var(--panel));padding:11px 13px}.filter{border-radius:999px}.chapter{padding:13px 17px}.chapter:hover{background:var(--soft)}.number{border-radius:50%;width:31px;height:31px;flex-basis:31px}.chapter.active{background:var(--soft)}
+.text-fullscreen{background:var(--bg);isolation:isolate}.text-fullscreen.open{min-height:100%;min-height:100dvh}.text-fullscreen-head{top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));left:auto;gap:5px;padding:6px;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);border-radius:999px;background:color-mix(in srgb,var(--panel) 82%,transparent);box-shadow:0 8px 32px rgba(0,0,0,.09);backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);opacity:.18}
+.text-fullscreen-head:hover,.text-fullscreen-head:focus-within{opacity:1}.text-fullscreen-head button{display:grid;place-items:center;min-width:38px;min-height:38px;padding:0;border-radius:50%;font-size:15px;font-weight:600}.text-fullscreen-head button.active{background:var(--accent);color:#fff;border-color:var(--accent)}.text-fullscreen-head button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}.text-fullscreen-head .function-toggle{font-size:11px;letter-spacing:-.6px;min-width:42px;border-radius:999px;padding:0 8px}.text-fullscreen-head .function-toggle[aria-pressed="true"]{background:var(--soft);color:var(--accent);border-color:var(--accent)}.fullscreen-speed{gap:2px}.fullscreen-speed button{min-width:32px;min-height:34px;font-size:17px}.speed-readout{min-width:34px;font-size:12px}.text-fullscreen .reader{padding:clamp(22px,6vw,72px);font-size:clamp(21px,2.6vh,29px);line-height:2.08;scroll-padding-block:40vh}.rsvp-view{padding:24px}.rsvp-word{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;font-weight:650;letter-spacing:-.045em;font-size:clamp(44px,9vw,92px)}
+#themeBtn{min-width:40px;width:40px;padding:0;display:grid;place-items:center;font-size:18px}#followBtn{min-width:40px;width:40px;padding:0;font-size:17px}#fullTextBtn{min-width:40px;width:40px;padding:0;font-size:18px}
+@media(max-width:760px){.layout{gap:14px;margin:12px auto}.now{padding:18px}.panel{border-radius:20px}.controls{gap:6px}.controls button{min-width:38px;padding:7px 9px}.controls .seek-btn{min-width:45px}.reader-actions{gap:5px}.reader-head{align-items:center}.text-fullscreen-head{top:calc(7px + env(safe-area-inset-top,0px));right:calc(7px + env(safe-area-inset-right,0px));gap:3px;padding:4px;opacity:.34}.text-fullscreen-head button{min-width:34px;min-height:34px;font-size:14px}.text-fullscreen-head .function-toggle{min-width:39px;font-size:10px}.fullscreen-speed button{min-width:29px;min-height:32px}.text-fullscreen .reader{padding:calc(24px + env(safe-area-inset-top,0px)) calc(18px + env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) calc(18px + env(safe-area-inset-left,0px));font-size:clamp(19px,2.4vh,25px);line-height:2}.rsvp-word{font-size:clamp(40px,11vw,70px)}}
+
 </style>
 </head>
 <body>
 <header>
-  <div><div class="brand">Audiobook Player</div><div class="sub">One chapter per file · GitHub Pages</div></div>
-  <button id="themeBtn" type="button" aria-label="Toggle dark mode">☾ Dark mode</button>
+  <div><div class="brand">The Idiot</div><div class="sub">Audiobook · Read along</div></div>
+  <button id="themeBtn" type="button" aria-label="Toggle dark mode" title="Appearance">☾</button>
 </header>
 <main class="layout">
   <section class="panel">
@@ -45,18 +67,18 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
       <div class="filename" id="fileLabel">Part_I_Chapter_01.mp3</div>
       <audio id="audio" controls preload="metadata"></audio>
       <div class="controls">
-        <button id="prevBtn" type="button">← Previous</button>
-        <button id="back10Btn" type="button" class="seek-btn" aria-label="Back 10 seconds">↶ 10 sec</button>
-        <button id="playBtn" class="primary" type="button">▶ Play</button>
-        <button id="forward10Btn" type="button" class="seek-btn" aria-label="Forward 10 seconds">10 sec ↷</button>
-        <button id="nextBtn" type="button">Next →</button>
-        <button id="restartBtn" type="button">↺ Restart</button>
-        <label class="sub" for="playbackRate">Speed</label><button id="slowerBtn" type="button" aria-label="Decrease playback speed">−</button><select id="playbackRate" class="speed-select" aria-label="Audio playback speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="1.75">1.75×</option><option value="2">2×</option><option value="2.5">2.5×</option><option value="3">3×</option></select><button id="fasterBtn" type="button" aria-label="Increase playback speed">+</button>
+        <button id="prevBtn" type="button" aria-label="Previous chapter" title="Previous chapter">‹</button>
+        <button id="back10Btn" type="button" class="seek-btn" aria-label="Back 10 seconds" title="Back 10 seconds">↶10</button>
+        <button id="playBtn" class="primary" type="button" aria-label="Play or pause" title="Play or pause">▶</button>
+        <button id="forward10Btn" type="button" class="seek-btn" aria-label="Forward 10 seconds" title="Forward 10 seconds">10↷</button>
+        <button id="nextBtn" type="button" aria-label="Next chapter" title="Next chapter">›</button>
+        <button id="restartBtn" type="button" aria-label="Restart chapter" title="Restart chapter">↺</button>
+        <label class="sub" for="playbackRate" title="Playback speed">×</label><button id="slowerBtn" type="button" aria-label="Decrease playback speed">−</button><select id="playbackRate" class="speed-select" aria-label="Audio playback speed"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="1.75">1.75×</option><option value="2">2×</option><option value="2.5">2.5×</option><option value="3">3×</option></select><button id="fasterBtn" type="button" aria-label="Increase playback speed">+</button>
       </div>
       <div class="progressline"><span id="timeCurrent">0:00</span><span id="timeDuration">0:00</span></div>
       <div class="status" id="status">Checking which audio files are available…</div>
       <div class="keys"><span><kbd>Space</kbd> Play/pause</span><span><kbd>←</kbd> Previous chapter</span><span><kbd>→</kbd> Next chapter</span><span><kbd>Esc</kbd> Close full-screen text</span></div>
-      <div class="reader-head"><div><div class="eyebrow">Read along</div><div class="reader-note" id="readerNote">Preparing chapter text…</div></div><div class="reader-actions"><button id="followBtn" type="button" class="filter active">Follow audio: on</button><button id="fullTextBtn" type="button">⛶ Full-screen text</button></div></div>
+      <div class="reader-head"><div><div class="eyebrow">Read along</div><div class="reader-note" id="readerNote">Preparing chapter text…</div></div><div class="reader-actions"><button id="followBtn" type="button" class="filter active" aria-label="Toggle follow audio" title="Toggle follow audio">◎</button><button id="fullTextBtn" type="button" aria-label="Open full-screen text" title="Full-screen text">⛶</button></div></div>
       <div id="reader" class="reader" aria-live="off">Chapter text and word timing files will appear here after you run <code>prepare_readalong.py</code>.</div>
     </div>
   </section>
@@ -77,11 +99,12 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
 </main>
 <div id="textFullscreen" class="text-fullscreen" role="dialog" aria-modal="true" aria-label="Full-screen read-along text">
   <div class="text-fullscreen-head" aria-label="Text view controls">
-    <button id="guidedModeBtn" type="button" class="active" aria-pressed="true">Text</button>
-    <button id="rsvpModeBtn" type="button" aria-pressed="false">RSVP</button>
-    <button id="fullPlayBtn" type="button" aria-label="Play or pause audiobook">▶</button>
-    <div class="fullscreen-speed" aria-label="Audiobook speed"><button id="fullSlowerBtn" type="button" aria-label="Decrease playback speed">−</button><span id="fullSpeedReadout" class="speed-readout">1×</span><button id="fullFasterBtn" type="button" aria-label="Increase playback speed">+</button></div>
-    <button id="closeFullTextBtn" type="button" aria-label="Close full-screen text">✕</button>
+    <button id="guidedModeBtn" type="button" class="active" aria-pressed="true" aria-label="Text mode" title="Text mode">T</button>
+    <button id="rsvpModeBtn" type="button" aria-pressed="false" aria-label="RSVP mode" title="RSVP mode">◉</button>
+    <button id="fullPlayBtn" type="button" aria-label="Play or pause audiobook" title="Play or pause">▶</button>
+    <div class="fullscreen-speed" aria-label="Audiobook speed"><button id="fullSlowerBtn" type="button" aria-label="Decrease playback speed" title="Decrease speed">−</button><span id="fullSpeedReadout" class="speed-readout">1×</span><button id="fullFasterBtn" type="button" aria-label="Increase playback speed" title="Increase speed">+</button></div>
+    <button id="functionWordsBtn" type="button" class="function-toggle" aria-label="Show function words in RSVP" title="Show function words" aria-pressed="false">a·the</button>
+    <button id="closeFullTextBtn" type="button" aria-label="Close full-screen text" title="Close">×</button>
   </div>
   <div id="rsvpView" class="rsvp-view" hidden aria-live="off"><div id="rsvpWord" class="rsvp-word"></div></div>
 </div>
@@ -102,7 +125,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   const reader=$('reader'), readerHome=reader.parentNode, readerAnchor=reader.nextSibling;
   let textFullscreen=false, fullscreenMode='guided';
   let current=0, filterPart='all', wordRecords=[], followAudio=true, lastWord=-1;
-  let rsvpIndex=-1, rsvpTimer=null, fullscreenRequested=false;
+  let rsvpIndex=-1, rsvpTimer=null, fullscreenRequested=false, showFunctionWords=false;
   const playbackRates=[0.5,0.75,1,1.25,1.5,1.75,2,2.5,3];
   // RSVP can omit common function words; the full synchronized text still contains every word.
   const rsvpFunctionWords = new Set((
@@ -115,6 +138,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     "can could may might must shall should will would just very also only even still already again not no yes"
   ).toLowerCase().split(/\s+/));
   function isRsvpFunctionWord(index) {
+    if(showFunctionWords) return false;
     const raw = wordRecords[index]?.el?.textContent || '';
     const normalized = raw.toLowerCase().replace(/[’‘]/g, "'").replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, '');
     return !normalized || rsvpFunctionWords.has(normalized);
@@ -227,7 +251,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   function syncRsvpToAudio() {
     if(!wordRecords.length) return;
     // Hold the last meaningful word while function words are spoken.
-    rsvpIndex=contentWordAtTime(audio.currentTime);
+    rsvpIndex=showFunctionWords ? findWordAtTime(audio.currentTime) : contentWordAtTime(audio.currentTime);
     setCurrentIndex(rsvpIndex,true);
   }
   function scheduleNextRsvpWord() {
@@ -267,7 +291,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     $('textFullscreen').appendChild(reader);
     $('textFullscreen').classList.add('open');
     document.body.classList.add('text-open');
-    $('fullTextBtn').textContent='⤢ Exit full-screen';
+    $('fullTextBtn').textContent='⛶'; $('fullTextBtn').title='Exit full-screen text'; $('fullTextBtn').setAttribute('aria-label','Exit full-screen text');
     textFullscreen=true;
     setFullscreenMode('guided');
     // Use the browser's real fullscreen API where supported (not just a CSS overlay).
@@ -296,7 +320,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     if(readerAnchor) readerHome.insertBefore(reader,readerAnchor); else readerHome.appendChild(reader);
     $('textFullscreen').classList.remove('open');
     document.body.classList.remove('text-open');
-    $('fullTextBtn').textContent='⛶ Full-screen text';
+    $('fullTextBtn').textContent='⛶'; $('fullTextBtn').title='Full-screen text'; $('fullTextBtn').setAttribute('aria-label','Open full-screen text');
     textFullscreen=false;
     if(document.fullscreenElement && document.exitFullscreen) {
       try { await document.exitFullscreen(); } catch(e) {}
@@ -313,6 +337,9 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     $('rsvpModeBtn').classList.toggle('active',rsvp);
     $('guidedModeBtn').setAttribute('aria-pressed',String(!rsvp));
     $('rsvpModeBtn').setAttribute('aria-pressed',String(rsvp));
+    $('functionWordsBtn').setAttribute('aria-pressed',String(showFunctionWords));
+    $('functionWordsBtn').setAttribute('aria-label',showFunctionWords?'Hide function words in RSVP':'Show function words in RSVP');
+    $('functionWordsBtn').title=showFunctionWords?'Hide function words':'Show function words';
     stopRsvpScheduler();
     if(rsvp) {
       syncRsvpToAudio();
@@ -321,6 +348,13 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   }
   $('guidedModeBtn').addEventListener('click',()=>setFullscreenMode('guided'));
   $('rsvpModeBtn').addEventListener('click',()=>setFullscreenMode('rsvp'));
+  $('functionWordsBtn').addEventListener('click',()=>{
+    showFunctionWords=!showFunctionWords;
+    $('functionWordsBtn').setAttribute('aria-pressed',String(showFunctionWords));
+    $('functionWordsBtn').setAttribute('aria-label',showFunctionWords?'Hide function words in RSVP':'Show function words in RSVP');
+    $('functionWordsBtn').title=showFunctionWords?'Hide function words':'Show function words';
+    if(textFullscreen && fullscreenMode==='rsvp'){stopRsvpScheduler();syncRsvpToAudio();if(!audio.paused)scheduleNextRsvpWord();}
+  });
   $('fullPlayBtn').addEventListener('click',()=>{if(audio.paused)audio.play().catch(()=>{});else audio.pause();});
   $('slowerBtn').addEventListener('click',()=>changePlaybackRate(-1));
   $('fasterBtn').addEventListener('click',()=>changePlaybackRate(1));
@@ -333,7 +367,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement && textFullscreen && fullscreenRequested){fullscreenRequested=false;closeFullText();}});
   $('followBtn').addEventListener('click',()=>{
     followAudio=!followAudio;
-    $('followBtn').textContent=`Follow audio: ${followAudio?'on':'off'}`;
+    $('followBtn').textContent=followAudio?'◎':'○'; $('followBtn').title=followAudio?'Follow audio is on':'Follow audio is off'; $('followBtn').setAttribute('aria-pressed',String(followAudio));
     $('followBtn').classList.toggle('active',followAudio);
     if(followAudio) updateCurrentWord();
   });
@@ -345,7 +379,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
     $('fileLabel').textContent=c.file;
     audio.src=c.src; audio.load();
     loadReader(c);
-    $('playBtn').textContent='▶ Play';
+    $('playBtn').textContent='▶';
     renderList();
     setStatus(c.available===false?'Audio file not found. Check that it exists in build/audio_in/merged_chapters/.':c.available===true?'Ready to play.':'Trying to load audio…',c.available===false?'warn':'');
     if(autoplay) audio.play().catch(()=>setStatus('Could not start playback. Check that the MP3 exists in audio_in/.','warn'));
@@ -356,8 +390,8 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   $('back10Btn')?.addEventListener('click',()=>{audio.currentTime=Math.max(0,audio.currentTime-10);});
   $('forward10Btn')?.addEventListener('click',()=>{audio.currentTime=Math.min(Number.isFinite(audio.duration)?audio.duration:Infinity,audio.currentTime+10);});
   $('restartBtn').addEventListener('click',()=>{audio.currentTime=0;audio.play().catch(()=>{});});
-  audio.addEventListener('play',()=>{$('playBtn').textContent='Ⅱ Pause';$('fullPlayBtn').textContent='Ⅱ';if(textFullscreen&&fullscreenMode==='rsvp')scheduleNextRsvpWord();});
-  audio.addEventListener('pause',()=>{$('playBtn').textContent='▶ Play';$('fullPlayBtn').textContent='▶';stopRsvpScheduler();});
+  audio.addEventListener('play',()=>{$('playBtn').textContent='Ⅱ';$('fullPlayBtn').textContent='Ⅱ';if(textFullscreen&&fullscreenMode==='rsvp')scheduleNextRsvpWord();});
+  audio.addEventListener('pause',()=>{$('playBtn').textContent='▶';$('fullPlayBtn').textContent='▶';stopRsvpScheduler();});
   audio.addEventListener('ratechange',()=>{const rate=audio.playbackRate;$('playbackRate').value=String(playbackRates.reduce((a,b)=>Math.abs(b-rate)<Math.abs(a-rate)?b:a,playbackRates[0]));$('fullSpeedReadout').textContent=`${rate}×`;if(textFullscreen&&fullscreenMode==='rsvp'&&!audio.paused)scheduleNextRsvpWord();});
   audio.addEventListener('timeupdate',()=>{$('timeCurrent').textContent=fmt(audio.currentTime);$('timeDuration').textContent=fmt(audio.duration);updateCurrentWord();});
   audio.addEventListener('seeked',()=>{if(textFullscreen&&fullscreenMode==='rsvp'){stopRsvpScheduler();syncRsvpToAudio();scheduleNextRsvpWord();}else updateCurrentWord();});
@@ -366,7 +400,7 @@ audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:
   audio.addEventListener('ended',()=>{if(current<chapters.length-1)load(current+1,true);});
   $('search').addEventListener('input',renderList);
   $('filters').addEventListener('click',e=>{const b=e.target.closest('button[data-part]');if(!b)return;filterPart=b.dataset.part;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));renderList();});
-  $('themeBtn').addEventListener('click',()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';$('themeBtn').textContent=dark?'☀ Light mode':'☾ Dark mode';try{localStorage.setItem('audiobook-theme',dark?'dark':'light')}catch(e){}});
+  $('themeBtn').addEventListener('click',()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';$('themeBtn').textContent=dark?'☀':'☾'; $('themeBtn').title=dark?'Light appearance':'Dark appearance';try{localStorage.setItem('audiobook-theme',dark?'dark':'light')}catch(e){}});
   try{if(localStorage.getItem('audiobook-theme')==='dark'){$('themeBtn').click()}}catch(e){}
   document.addEventListener('keydown',e=>{
     if(e.metaKey||e.ctrlKey||e.altKey)return;
