@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audiobook — Chapter Player</title>
+<style>
+:root{color-scheme:light;--bg:#f5f6f8;--panel:#fff;--text:#20242b;--muted:#687080;--line:#e1e5eb;--accent:#5b63e6;--soft:#eef0ff;--good:#16835d;--bad:#b45309;--shadow:0 8px 28px #1d27350b}
+[data-theme="dark"]{color-scheme:dark;--bg:#101216;--panel:#191d24;--text:#edf0f5;--muted:#a0a8b6;--line:#303743;--accent:#9ca3ff;--soft:#292d49;--good:#62d6a5;--bad:#fbbf72;--shadow:0 8px 28px #0003}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}button{cursor:pointer;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);padding:9px 13px}button:hover{border-color:var(--accent)}button:disabled{opacity:.4;cursor:not-allowed}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:15px max(18px,calc((100vw - 1100px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:750;font-size:18px;letter-spacing:-.3px}.sub{color:var(--muted);font-size:12px}.layout{max-width:1100px;margin:26px auto;padding:0 18px;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:20px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow);overflow:hidden}.now{padding:24px}.eyebrow{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1.3px;font-weight:700}.chapter-title{font-size:clamp(24px,4vw,36px);line-height:1.15;margin:7px 0 5px;letter-spacing:-.8px}.filename{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+audio{width:100%;margin:24px 0 14px} .controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.primary{background:var(--accent);border-color:var(--accent);color:white;font-weight:650}.primary:hover{opacity:.9}.progressline{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:4px}
+.status{padding:12px 14px;border-radius:11px;background:var(--bg);color:var(--muted);font-size:13px;margin-top:17px}.status.good{color:var(--good)}.status.warn{color:var(--bad)}
+.list-head{padding:16px;border-bottom:1px solid var(--line)}.list-head h2{font-size:16px;margin:0 0 10px}.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);outline:none}.search:focus{border-color:var(--accent)}
+.filters{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.filter{padding:5px 9px;font-size:12px;border-radius:999px}.filter.active{background:var(--soft);border-color:var(--accent)}
+.chapters{max-height:calc(100vh - 250px);min-height:300px;overflow:auto}.chapter{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;text-align:left;padding:12px 15px;display:flex;gap:10px;align-items:center;background:transparent}.chapter:hover{background:var(--bg)}.chapter.active{background:var(--soft)}.number{width:29px;height:29px;flex:0 0 29px;border-radius:8px;background:var(--bg);display:grid;place-items:center;font-size:11px;color:var(--muted);font-weight:700}.chapter.active .number{background:var(--accent);color:white}.chapter-info{min-width:0;flex:1}.chapter-name{font-weight:600}.chapter-file{font-size:11px;color:var(--muted);overflow-wrap:anywhere}.dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:0 0 8px}.dot.yes{background:var(--good)}.empty{padding:22px;color:var(--muted);text-align:center}
+.footer{max-width:1100px;padding:0 18px;margin:0 auto 28px;color:var(--muted);font-size:12px}.keys{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}kbd{font:11px ui-monospace,monospace;padding:3px 6px;border:1px solid var(--line);border-radius:5px;background:var(--bg)}
+@media(max-width:760px){.layout{grid-template-columns:1fr;margin:16px auto}.chapters{max-height:48vh;min-height:220px}header{padding:12px 16px}.now{padding:19px}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="brand">Audiobook Player</div><div class="sub">One chapter per file · GitHub Pages</div></div>
+  <button id="themeBtn" type="button" aria-label="Toggle dark mode">☾ Dark mode</button>
+</header>
+<main class="layout">
+  <section class="panel">
+    <div class="now">
+      <div class="eyebrow" id="partLabel">PART I</div>
+      <h1 class="chapter-title" id="chapterTitle">Chapter 01</h1>
+      <div class="filename" id="fileLabel">Part_I_Chapter_01.mp3</div>
+      <audio id="audio" controls preload="metadata"></audio>
+      <div class="controls">
+        <button id="prevBtn" type="button">← Previous</button>
+        <button id="playBtn" class="primary" type="button">▶ Play</button>
+        <button id="nextBtn" type="button">Next →</button>
+        <button id="restartBtn" type="button">↺ Restart</button>
+      </div>
+      <div class="progressline"><span id="timeCurrent">0:00</span><span id="timeDuration">0:00</span></div>
+      <div class="status" id="status">Checking which audio files are available…</div>
+      <div class="keys"><span><kbd>Space</kbd> Play/pause</span><span><kbd>←</kbd> Previous</span><span><kbd>→</kbd> Next</span></div>
+    </div>
+  </section>
+  <aside class="panel">
+    <div class="list-head">
+      <h2>Chapters <span id="count" class="sub"></span></h2>
+      <input id="search" class="search" type="search" placeholder="Find a chapter…" aria-label="Find a chapter">
+      <div class="filters" id="filters">
+        <button class="filter active" data-part="all">All parts</button>
+        <button class="filter" data-part="1">Part I</button>
+        <button class="filter" data-part="2">Part II</button>
+        <button class="filter" data-part="3">Part III</button>
+        <button class="filter" data-part="4">Part IV</button>
+      </div>
+    </div>
+    <div id="chapters" class="chapters"></div>
+  </aside>
+</main>
+<div class="footer">Host this page as <code>index.html</code> on GitHub Pages. Audio files are loaded from <code>build/merged_chapters/</code> using relative paths.</div>
+<script>
+(() => {
+  const chapters = [];
+  const counts = [0,16,12,10,12];
+  for (let part=1; part<=4; part++) {
+    for (let ch=1; ch<=counts[part]; ch++) {
+      const p = String(part).padStart(2,'0');
+      const c = String(ch).padStart(2,'0');
+      chapters.push({part, ch, file:`Part_${['','I','II','III','IV'][part]}_Chapter_${c}.mp3`, src:`./build/merged_chapters/Part_${['','I','II','III','IV'][part]}_Chapter_${c}.mp3`, available:null});
+    }
+  }
+  const $ = id => document.getElementById(id);
+  const audio=$('audio'), list=$('chapters');
+  let current=0, filterPart='all';
+  const roman={1:'I',2:'II',3:'III',4:'IV'};
+  const fmt=t => { if (!Number.isFinite(t)||t<0) return '0:00'; const s=Math.floor(t); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
+  function setStatus(message, kind='') { $('status').textContent=message; $('status').className='status '+kind; }
+  function filtered() {
+    const q=$('search').value.trim().toLowerCase();
+    return chapters.map((c,i)=>({...c,i})).filter(c=>(filterPart==='all'||String(c.part)===filterPart)&&(!q||c.file.toLowerCase().includes(q)||`part ${roman[c.part]} chapter ${c.ch}`.includes(q)));
+  }
+  function renderList() {
+    list.innerHTML='';
+    const rows=filtered();
+    $('count').textContent=`(${rows.length})`;
+    if(!rows.length){list.innerHTML='<div class="empty">No chapters match that search.</div>';return;}
+    for(const c of rows){
+      const b=document.createElement('button'); b.type='button'; b.className='chapter'+(c.i===current?' active':'');
+      b.innerHTML=`<span class="number">${String(c.ch).padStart(2,'0')}</span><span class="chapter-info"><span class="chapter-name">Part ${roman[c.part]} · Chapter ${String(c.ch).padStart(2,'0')}</span><br><span class="chapter-file">${c.file}</span></span><span class="dot ${c.available?'yes':''}" title="${c.available?'File found':'File missing or not checked'}"></span>`;
+      b.addEventListener('click',()=>load(c.i,true)); list.appendChild(b);
+    }
+  }
+  function load(index, autoplay=false) {
+    current=Math.max(0,Math.min(chapters.length-1,index));
+    const c=chapters[current];
+    $('partLabel').textContent=`PART ${roman[c.part]}`;
+    $('chapterTitle').textContent=`Chapter ${String(c.ch).padStart(2,'0')}`;
+    $('fileLabel').textContent=c.file;
+    audio.src=c.src; audio.load();
+    $('playBtn').textContent='▶ Play';
+    renderList();
+    setStatus(c.available===false?'Audio file not found. Check that it exists in build/merged_chapters/.':c.available===true?'Ready to play.':'Trying to load audio…',c.available===false?'warn':'');
+    if(autoplay) audio.play().catch(()=>setStatus('Could not start playback. Check that the MP3 exists in audio_in/.','warn'));
+  }
+  $('prevBtn').addEventListener('click',()=>load(current-1,true));
+  $('nextBtn').addEventListener('click',()=>load(current+1,true));
+  $('playBtn').addEventListener('click',()=>{if(audio.paused)audio.play().catch(()=>{});else audio.pause();});
+  $('restartBtn').addEventListener('click',()=>{audio.currentTime=0;audio.play().catch(()=>{});});
+  audio.addEventListener('play',()=>{$('playBtn').textContent='Ⅱ Pause';});
+  audio.addEventListener('pause',()=>{$('playBtn').textContent='▶ Play';});
+  audio.addEventListener('timeupdate',()=>{$('timeCurrent').textContent=fmt(audio.currentTime);$('timeDuration').textContent=fmt(audio.duration);});
+  audio.addEventListener('loadedmetadata',()=>{chapters[current].available=true;setStatus('Audio loaded and ready.','good');renderList();$('timeDuration').textContent=fmt(audio.duration);});
+  audio.addEventListener('error',()=>{chapters[current].available=false;setStatus('Could not load this MP3. Make sure the filename and audio_in/ path are correct.','warn');renderList();});
+  audio.addEventListener('ended',()=>{if(current<chapters.length-1)load(current+1,true);});
+  $('search').addEventListener('input',renderList);
+  $('filters').addEventListener('click',e=>{const b=e.target.closest('button[data-part]');if(!b)return;filterPart=b.dataset.part;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));renderList();});
+  $('themeBtn').addEventListener('click',()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';$('themeBtn').textContent=dark?'☀ Light mode':'☾ Dark mode';try{localStorage.setItem('audiobook-theme',dark?'dark':'light')}catch(e){}});
+  try{if(localStorage.getItem('audiobook-theme')==='dark'){$('themeBtn').click()}}catch(e){}
+  document.addEventListener('keydown',e=>{
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    if(e.target.matches('input,textarea,select,[contenteditable="true"]'))return;
+    if(e.code==='Space'){e.preventDefault();if(audio.paused)audio.play().catch(()=>{});else audio.pause();}
+    else if(e.key==='ArrowLeft'){e.preventDefault();load(current-1,true);}
+    else if(e.key==='ArrowRight'){e.preventDefault();load(current+1,true);}
+  });
+  renderList(); load(0);
+  // Probe each file quietly so the chapter list can show which files exist.
+  Promise.all(chapters.map(async c=>{try{const r=await fetch(c.src,{method:'HEAD',cache:'no-store'});c.available=r.ok&&r.headers.get('content-type')!=='text/html';}catch(e){c.available=false;}})).then(()=>{renderList();if(chapters[current].available===false)setStatus('No MP3 detected for this chapter yet. Check build/merged_chapters/ and refresh.','warn');});
+})();
+</script>
+</body>
+</html>
